@@ -6,62 +6,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadAppointments() {
 
-        try {
+    try {
 
-            const response = await fetch(
-                CONFIG.SCRIPT_URL + "?action=appointments"
-            );
+        console.log("Loading appointments...");
 
-            const result = await response.json();
+        const response = await fetch(CONFIG.SCRIPT_URL + "?action=appointments");
 
-            if (!result.success) {
-                alert("Failed to load appointments");
-                return;
-            }
+        const result = await response.json();
 
-            appointments = result.data;
+        console.log("Backend Response:", result);
 
-            renderAppointments();
+        if (!result.success) {
 
-        } catch (error) {
+            console.log("Backend returned success = false");
 
-            console.error(error);
-
-            alert("Backend Connection Failed");
+            return;
 
         }
 
+        appointments = result.data;
+
+        console.log("Appointments Array:", appointments);
+
+        renderAppointments();
+
+    } catch (error) {
+
+        console.error("Load Error:", error);
+
     }
+
+}
 
     function renderAppointments() {
 
-        tableBody.innerHTML = "";
+    console.log("Table Body:", tableBody);
 
-        appointments.forEach(app => {
+    console.log("Appointments Count:", appointments.length);
 
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${app.patientName}</td>
-                    <td>${app.doctor}</td>
-                    <td>${app.department}</td>
-                    <td>${app.date}</td>
-                    <td>${app.time}</td>
-                    <td>${app.status}</td>
-                    <td>
-                        <button class="edit-btn" data-id="${app.id}">
-                            Edit
-                        </button>
+    tableBody.innerHTML = "";
 
-                        <button class="delete-btn" data-id="${app.id}">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `;
+    appointments.forEach(app => {
 
-        });
+        console.log(app);
 
-    }
+        tableBody.innerHTML += `
+            <tr>
+                <td>${app.patientName}</td>
+                <td>${app.doctor}</td>
+                <td>${app.department}</td>
+                <td>${app.date}</td>
+                <td>${app.time}</td>
+                <td>${app.status}</td>
+                <td>Edit | Delete</td>
+            </tr>
+        `;
+
+    });
+
+}
 
     loadAppointments();
 
