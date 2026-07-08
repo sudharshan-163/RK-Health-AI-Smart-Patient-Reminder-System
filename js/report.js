@@ -69,7 +69,7 @@
 
         return reports.filter((report) => {
             const matchesSearch = [report.patient, report.type, report.doctor, report.status, report.id]
-                .some((value) => value.toLowerCase().includes(search));
+                .some((value) => String(value).toLowerCase().includes(search));
             const matchesType = type === "All" || report.type === type;
             const matchesStart = !start || report.date >= start;
             const matchesEnd = !end || report.date <= end;

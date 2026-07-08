@@ -14,96 +14,12 @@
     const statAccuracy = document.querySelector("#overview .stat-card:nth-child(4) .value");
 
     const summaries = [
-        {
-            id: "S-2201",
-            name: "Emma Walker",
-            age: 62,
-            condition: "Type 2 Diabetes",
-            risk: "Medium",
-            meds: "Metformin 500mg, Insulin (basal)",
-            lastVisit: "2026-07-06",
-            nextVisit: "2026-07-20",
-            summary: "Elevated fasting glucose trends with inconsistent post-prandial control. Weight gain noted, moderate microvascular risk.",
-            recommendation: "Schedule diabetes education, review medication timing, and follow up in two weeks.",
-            confidence: 92,
-            healthScore: 78,
-            medicationScore: 85,
-        },
-        {
-            id: "S-2202",
-            name: "Noah Patel",
-            age: 48,
-            condition: "Hypertension",
-            risk: "Low",
-            meds: "Amlodipine 5mg",
-            lastVisit: "2026-07-05",
-            nextVisit: "2026-07-22",
-            summary: "Intermittent blood pressure elevations and missed doses, borderline lipid profile.",
-            recommendation: "Reinforce reminders, home BP monitoring, and dietary counseling.",
-            confidence: 95,
-            healthScore: 84,
-            medicationScore: 88,
-        },
-        {
-            id: "S-2203",
-            name: "Sophia Lee",
-            age: 71,
-            condition: "COPD",
-            risk: "High",
-            meds: "Salbutamol PRN, Tiotropium",
-            lastVisit: "2026-07-04",
-            nextVisit: "2026-07-25",
-            summary: "Increased exacerbation risk with reduced inhaler adherence and borderline oxygen saturation.",
-            recommendation: "Schedule inhaler training, ensure refills, and create an action plan.",
-            confidence: 88,
-            healthScore: 69,
-            medicationScore: 76,
-        },
-        {
-            id: "S-2204",
-            name: "Michael Brown",
-            age: 55,
-            condition: "Hyperlipidemia",
-            risk: "Low",
-            meds: "Atorvastatin 20mg",
-            lastVisit: "2026-07-03",
-            nextVisit: "2026-07-30",
-            summary: "LDL above target, consistent adherence, consider therapy escalation.",
-            recommendation: "Evaluate dose adjustment or add non-statin therapy and dietary counseling.",
-            confidence: 90,
-            healthScore: 82,
-            medicationScore: 89,
-        },
-        {
-            id: "S-2205",
-            name: "Ava Johnson",
-            age: 36,
-            condition: "Asthma",
-            risk: "Medium",
-            meds: "Budesonide, Salbutamol PRN",
-            lastVisit: "2026-07-02",
-            nextVisit: "2026-07-18",
-            summary: "Increased rescue inhaler use, seasonal allergy triggers, medium exacerbation risk.",
-            recommendation: "Review technique, step up controller therapy, follow up in two weeks.",
-            confidence: 89,
-            healthScore: 75,
-            medicationScore: 81,
-        },
-        {
-            id: "S-2206",
-            name: "Liam Kelly",
-            age: 67,
-            condition: "Heart Failure",
-            risk: "High",
-            meds: "ACE inhibitor, Beta blocker",
-            lastVisit: "2026-07-01",
-            nextVisit: "2026-07-21",
-            summary: "Weight gain and mild fluid retention indicate early decompensation, adherence variable.",
-            recommendation: "Urgent weight check, optimize dosing, earlier clinic review.",
-            confidence: 86,
-            healthScore: 68,
-            medicationScore: 72,
-        },
+        { id: "S-2201", name: "Emma Walker", age: 62, condition: "Type 2 Diabetes", risk: "Medium", meds: "Metformin 500mg, Insulin (basal)", lastVisit: "2026-07-06", nextVisit: "2026-07-20", summary: "Elevated fasting glucose trends with inconsistent post-prandial control. Weight gain noted, moderate microvascular risk.", recommendation: "Schedule diabetes education, review medication timing, and follow up in two weeks.", confidence: 92, healthScore: 78, medicationScore: 85 },
+        { id: "S-2202", name: "Noah Patel", age: 48, condition: "Hypertension", risk: "Low", meds: "Amlodipine 5mg", lastVisit: "2026-07-05", nextVisit: "2026-07-22", summary: "Intermittent blood pressure elevations and missed doses, borderline lipid profile.", recommendation: "Reinforce reminders, home BP monitoring, and dietary counseling.", confidence: 95, healthScore: 84, medicationScore: 88 },
+        { id: "S-2203", name: "Sophia Lee", age: 71, condition: "COPD", risk: "High", meds: "Salbutamol PRN, Tiotropium", lastVisit: "2026-07-04", nextVisit: "2026-07-25", summary: "Increased exacerbation risk with reduced inhaler adherence and borderline oxygen saturation.", recommendation: "Schedule inhaler training, ensure refills, and create an action plan.", confidence: 88, healthScore: 69, medicationScore: 76 },
+        { id: "S-2204", name: "Michael Brown", age: 55, condition: "Hyperlipidemia", risk: "Low", meds: "Atorvastatin 20mg", lastVisit: "2026-07-03", nextVisit: "2026-07-30", summary: "LDL above target, consistent adherence, consider therapy escalation.", recommendation: "Evaluate dose adjustment or add non-statin therapy and dietary counseling.", confidence: 90, healthScore: 82, medicationScore: 89 },
+        { id: "S-2205", name: "Ava Johnson", age: 36, condition: "Asthma", risk: "Medium", meds: "Budesonide, Salbutamol PRN", lastVisit: "2026-07-02", nextVisit: "2026-07-18", summary: "Increased rescue inhaler use, seasonal allergy triggers, medium exacerbation risk.", recommendation: "Review technique, step up controller therapy, follow up in two weeks.", confidence: 89, healthScore: 75, medicationScore: 81 },
+        { id: "S-2206", name: "Liam Kelly", age: 67, condition: "Heart Failure", risk: "High", meds: "ACE inhibitor, Beta blocker", lastVisit: "2026-07-01", nextVisit: "2026-07-21", summary: "Weight gain and mild fluid retention indicate early decompensation, adherence variable.", recommendation: "Urgent weight check, optimize dosing, earlier clinic review.", confidence: 86, healthScore: 68, medicationScore: 72 },
     ];
 
     let currentPage = 1;
@@ -128,15 +44,15 @@
     function updateStats(filtered) {
         statTotal.textContent = filtered.length;
         statRisk.textContent = filtered.filter((item) => item.risk === "High").length;
-        statAdherence.textContent = `${filtered.reduce((sum, item) => sum + item.medicationScore, 0) / (filtered.length || 1) | 0}%`;
-        statAccuracy.textContent = `${filtered.reduce((sum, item) => sum + item.confidence, 0) / (filtered.length || 1) | 0}%`;
+        statAdherence.textContent = `${Math.round(filtered.reduce((sum, item) => sum + item.medicationScore, 0) / (filtered.length || 1))}%`;
+        statAccuracy.textContent = `${Math.round(filtered.reduce((sum, item) => sum + item.confidence, 0) / (filtered.length || 1))}%`;
     }
 
     function renderSummaries() {
         const searchText = searchInput.value.trim().toLowerCase();
         const filtered = summaries.filter((summary) => {
             return [summary.name, summary.condition, summary.summary, summary.recommendation]
-                .some((value) => value.toLowerCase().includes(searchText));
+                .some((value) => String(value).toLowerCase().includes(searchText));
         });
 
         const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));

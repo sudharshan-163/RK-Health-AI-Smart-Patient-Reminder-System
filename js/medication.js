@@ -20,24 +20,34 @@
     const saveButton = document.getElementById("save-medication-btn");
     const modalTitle = document.getElementById("modal-title");
 
-    const fields = {
-        patientName: form.patientName,
-        medicineName: form.medicineName,
-        dosage: form.dosage,
-        frequency: form.frequency,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        reminderTime: form.reminderTime,
-        doctor: form.doctor,
-        status: form.status,
-        notes: form.notes,
-    };
-
     let medications = [];
     let editingId = null;
-    let nextId = 0;
     let currentPage = 1;
     const pageSize = 10;
+
+    function createFallbackMedications() {
+        return [
+            { id: 1, patientName: "Emma Walker", medicineName: "Metformin", dosage: "500mg", frequency: "Twice daily", startDate: "2026-07-01", endDate: "2026-07-31", reminderTime: "08:00", doctor: "Dr. Rajesh Kumar", status: "Active", notes: "Monitor glucose" },
+            { id: 2, patientName: "Noah Patel", medicineName: "Amlodipine", dosage: "5mg", frequency: "Once daily", startDate: "2026-07-02", endDate: "2026-08-02", reminderTime: "09:30", doctor: "Dr. Priya Singh", status: "Active", notes: "Home BP tracking" },
+            { id: 3, patientName: "Sophia Lee", medicineName: "Salbutamol", dosage: "2 puffs", frequency: "As needed", startDate: "2026-07-03", endDate: "2026-07-20", reminderTime: "19:00", doctor: "Dr. Amit Patel", status: "Completed", notes: "Refill due" },
+        ];
+    }
+
+    function buildMedication(item) {
+        return {
+            id: Number(item.id),
+            patientName: item.patientName || "",
+            medicineName: item.medicineName || "",
+            dosage: item.dosage || "",
+            frequency: item.frequency || "",
+            startDate: item.startDate || "",
+            endDate: item.endDate || "",
+            reminderTime: item.reminderTime || "",
+            doctor: item.doctor || "",
+            status: item.status || "Active",
+            notes: item.notes || "",
+        };
+    }
 
     function openModal() {
         modal.classList.add("show");
@@ -57,7 +67,6 @@
     }
 
     function setLoading(active) {
-        loadingOverlay.style.display = active ? "flex" : "none";
         loadingOverlay.classList.toggle("hidden", !active);
     }
 
@@ -79,17 +88,17 @@
 
     function validateForm() {
         const required = [
-            fields.patientName,
-            fields.medicineName,
-            fields.dosage,
-            fields.frequency,
-            fields.startDate,
-            fields.endDate,
-            fields.reminderTime,
-            fields.doctor,
-            fields.status,
+            form.elements.patientName,
+            form.elements.medicineName,
+            form.elements.dosage,
+            form.elements.frequency,
+            form.elements.startDate,
+            form.elements.endDate,
+            form.elements.reminderTime,
+            form.elements.doctor,
+            form.elements.status,
         ];
-        const invalid = required.filter((field) => !field.value.trim());
+        const invalid = required.filter((field) => field && !String(field.value || "").trim());
         invalid.forEach((field) => field.classList.add("input-error"));
         return invalid.length === 0;
     }
@@ -140,7 +149,7 @@
         const search = searchInput.value.trim().toLowerCase();
         const status = statusFilter.value;
         return medications.filter((item) => {
-            const textMatch = [item.patientName, item.medicineName, item.doctor].some((value) => value.toLowerCase().includes(search));
+            const textMatch = [item.patientName, item.medicineName, item.doctor].some((value) => String(value).toLowerCase().includes(search));
             const statusMatch = status === "All" || item.status === status;
             return textMatch && statusMatch;
         });
@@ -163,61 +172,108 @@
     }
 
     function fillForm(item) {
-        Object.keys(fields).forEach((key) => {
-            fields[key].value = item[key] || "";
+        Object.entries(item).forEach(([key, value]) => {
+            if (form.elements[key]) {
+                form.elements[key].value = value || "";
+            }
         });
     }
 
     function getFormValues() {
         return {
-            patientName: fields.patientName.value.trim(),
-            medicineName: fields.medicineName.value.trim(),
-            dosage: fields.dosage.value.trim(),
-            frequency: fields.frequency.value.trim(),
-            startDate: fields.startDate.value,
-            endDate: fields.endDate.value,
-            reminderTime: fields.reminderTime.value,
-            doctor: fields.doctor.value.trim(),
-            status: fields.status.value,
-            notes: fields.notes.value.trim(),
+            patientName: form.elements.patientName.value.trim(),
+            medicineName: form.elements.medicineName.value.trim(),
+            dosage: form.elements.dosage.value.trim(),
+            frequency: form.elements.frequency.value.trim(),
+            startDate: form.elements.startDate.value,
+            endDate: form.elements.endDate.value,
+            reminderTime: form.elements.reminderTime.value,
+            doctor: form.elements.doctor.value.trim(),
+            status: form.elements.status.value,
+            notes: form.elements.notes.value.trim(),
         };
     }
 
-    function addMedication(values) {
-        medications.push({ id: nextId++, ...values });
-        setLoading(true);
-        setTimeout(() => {
-            currentPage = 1;
-            refreshTable();
-            setLoading(false);
-            showToast("Medication Added Successfully");
-        }, 180);
+    async function requestJson(url, options) {
+        try {
+            const response = await fetch(url, options);
+            const text = await response.text();
+            try {
+                return text ? JSON.parse(text) : {};
+            } catch (error) {
+                return { success: false, message: text || "Unexpected response from server" };
+            }
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: "Unable to reach the backend service." };
+        }
     }
 
-    function updateMedication(values) {
-        const item = medications.find((med) => med.id === editingId);
-        if (!item) return;
-        Object.assign(item, values);
+    async function loadMedications() {
         setLoading(true);
-        setTimeout(() => {
-            refreshTable();
+        try {
+            const result = await requestJson(`${CONFIG.SCRIPT_URL}?action=medications`);
+            if (result.success && Array.isArray(result.data)) {
+                medications = result.data.map(buildMedication);
+            } else {
+                medications = createFallbackMedications();
+                showToast(result.message || "Using offline medication data.");
+            }
+        } catch (error) {
+            console.error(error);
+            medications = createFallbackMedications();
+        } finally {
             setLoading(false);
-            showToast("Medication Updated Successfully");
-        }, 180);
+            window.__RK_MEDICATIONS__ = medications;
+            window.dispatchEvent(new CustomEvent("rk-data-updated"));
+            refreshTable();
+        }
     }
 
-    function deleteMedication(id) {
-        const item = medications.find((med) => med.id === id);
-        if (!item) return;
+    async function saveMedication(values) {
+        setLoading(true);
+        const action = editingId !== null ? "updateMedication" : "addMedication";
+        const payload = {
+            action,
+            data: editingId !== null ? { id: editingId, ...values } : values,
+        };
+        const result = await requestJson(CONFIG.SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+        setLoading(false);
+        if (result.success) {
+            await loadMedications();
+            closeModal();
+            showToast(editingId !== null ? "Medication Updated Successfully" : "Medication Added Successfully");
+        } else {
+            showToast(result.message || "Unable to save medication");
+        }
+    }
+
+    async function deleteMedicationRecord(id) {
+        const item = medications.find((med) => Number(med.id) === Number(id));
+        if (!item) {
+            return;
+        }
         const confirmed = window.confirm(`Delete medication for ${item.patientName}?`);
-        if (!confirmed) return;
-        medications = medications.filter((med) => med.id !== id);
+        if (!confirmed) {
+            return;
+        }
         setLoading(true);
-        setTimeout(() => {
-            refreshTable();
-            setLoading(false);
+        const result = await requestJson(CONFIG.SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "deleteMedication", data: { id } }),
+        });
+        setLoading(false);
+        if (result.success) {
+            await loadMedications();
             showToast("Medication Deleted Successfully");
-        }, 180);
+        } else {
+            showToast(result.message || "Unable to delete medication");
+        }
     }
 
     addButton.addEventListener("click", () => {
@@ -237,7 +293,9 @@
     });
 
     modal.addEventListener("click", (event) => {
-        if (event.target === modal) closeModal();
+        if (event.target === modal) {
+            closeModal();
+        }
     });
 
     form.addEventListener("submit", (event) => {
@@ -247,21 +305,17 @@
             showToast("Please complete all required fields.");
             return;
         }
-        const values = getFormValues();
-        if (editingId !== null) {
-            updateMedication(values);
-        } else {
-            addMedication(values);
-        }
-        closeModal();
+        saveMedication(getFormValues());
     });
 
     tableBody.addEventListener("click", (event) => {
         const editBtn = event.target.closest(".edit-medication-btn");
         if (editBtn) {
             const id = Number(editBtn.dataset.id);
-            const item = medications.find((med) => med.id === id);
-            if (!item) return;
+            const item = medications.find((med) => Number(med.id) === id);
+            if (!item) {
+                return;
+            }
             editingId = id;
             saveButton.textContent = "Update Medication";
             modalTitle.textContent = "Edit Medication";
@@ -271,7 +325,7 @@
         }
         const deleteBtn = event.target.closest(".delete-medication-btn");
         if (deleteBtn) {
-            deleteMedication(Number(deleteBtn.dataset.id));
+            deleteMedicationRecord(deleteBtn.dataset.id);
         }
     });
 
@@ -299,5 +353,5 @@
         refreshTable();
     });
 
-    refreshTable();
+    loadMedications();
 });

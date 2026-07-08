@@ -1,5 +1,4 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
-    console.log("RK Health Appointment JS Version 2");
     const openButton = document.getElementById("schedule-appointment-btn");
     const modal = document.getElementById("appointment-modal");
     const cancelButtons = document.querySelectorAll("#cancel-appointment-btn, #cancel-appointment-btn-bottom");
@@ -19,43 +18,88 @@
     const nextPageBtn = document.getElementById("next-page");
     const pageIndicator = document.getElementById("page-indicator");
     const recordsSummary = document.getElementById("records-summary");
-    const loadingOverlay = document.getElementById("loading-overlay");    const submitButton = form.querySelector("button[type='submit']");
+    const loadingOverlay = document.getElementById("loading-overlay");
+    const submitButton = form.querySelector("button[type='submit']");
 
     let appointments = [];
     let editingAppointmentId = null;
-    let nextAppointmentId = 0;
     let currentPage = 1;
     const pageSize = 10;
-    let currentSort = { key: "name", direction: "asc" };
+    let currentSort = { key: "dateRaw", direction: "asc" };
 
-    function parseExistingRows() {
-        appointments = Array.from(tableBody.querySelectorAll("tr")).map((row, index) => {
-            const cells = row.querySelectorAll("td");
-            const statusText = cells[5].textContent.trim();
-            const rawDate = parseRawDate(cells[3].textContent.trim());
-            nextAppointmentId = Math.max(nextAppointmentId, index + 1);
-            return {
-                id: index,
-                name: cells[0].textContent.trim(),
-                doctor: cells[1].textContent.trim(),
-                department: cells[2].textContent.trim(),
-                dateRaw: rawDate,
-                dateDisplay: cells[3].textContent.trim(),
-                time: cells[4].textContent.trim(),
-                status: statusText,
-                age: "",
-                gender: "",
-                phone: "",
-                notes: "",
-            };
+    function toISODate(offsetDays) {
+        const date = new Date();
+        date.setDate(date.getDate() + offsetDays);
+        return date.toISOString().slice(0, 10);
+    }
+
+    function createFallbackAppointments() {
+        return [
+            { id: 1, name: "Emma Walker", age: "62", gender: "Female", doctor: "Dr. Rajesh Kumar", department: "Cardiology", dateRaw: toISODate(1), dateDisplay: "", time: "09:00", phone: "9876543210", status: "Confirmed", notes: "Follow-up visit" },
+            { id: 2, name: "Noah Patel", age: "48", gender: "Male", doctor: "Dr. Priya Singh", department: "Neurology", dateRaw: toISODate(2), dateDisplay: "", time: "11:30", phone: "9123456780", status: "Pending", notes: "Needs MRI review" },
+            { id: 3, name: "Sophia Lee", age: "71", gender: "Female", doctor: "Dr. Amit Patel", department: "Orthopedics", dateRaw: toISODate(3), dateDisplay: "", time: "13:15", phone: "9988776655", status: "Confirmed", notes: "Mobility assessment" },
+        ];
+    }
+
+    function parseDateValue(value) {
+        if (!value) {
+            return null;
+        }
+        if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            const [year, month, day] = value.split("-").map(Number);
+            return new Date(Date.UTC(year, month - 1, day));
+        }
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function normalizeDate(value) {
+        const parsed = parseDateValue(value);
+        if (!parsed) {
+            return "";
+        }
+        const year = parsed.getUTCFullYear();
+        const month = String(parsed.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(parsed.getUTCDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDate(value) {
+        const parsed = parseDateValue(value);
+        if (!parsed) {
+            return "";
+        }
+        return parsed.toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
         });
+    }
+
+    function buildAppointment(item) {
+        return {
+            id: Number(item.id),
+            name: item.patientName || "",
+            age: item.age || "",
+            gender: item.gender || "",
+            doctor: item.doctor || "",
+            department: item.department || "",
+            dateRaw: normalizeDate(item.date),
+            dateDisplay: formatDate(item.date),
+            time: item.time || "",
+            phone: item.phone || "",
+            status: item.status || "Pending",
+            notes: item.notes || "",
+        };
     }
 
     function openModal() {
         modal.classList.add("show");
         setTimeout(() => {
             modal.classList.add("visible");
-            modal.querySelector("[name='patientName']").focus();
+            if (form.elements.patientName) {
+                form.elements.patientName.focus();
+            }
         }, 10);
     }
 
@@ -89,43 +133,20 @@
     }
 
     function setLoading(active) {
-        if (active) {
-            loadingOverlay.classList.remove("hidden");
-        } else {
-            loadingOverlay.classList.add("hidden");
-        }
+        loadingOverlay.classList.toggle("hidden", !active);
     }
 
     function updateRecordSummary(filteredCount) {
         const total = appointments.length;
-        if (filteredCount === total) {
-            recordsSummary.textContent = `Total records: ${total}`;
-        } else {
-            recordsSummary.textContent = `Showing ${filteredCount} of ${total} records`;
-        }
-    }
-
-    function parseRawDate(dateString) {
-        const parsed = new Date(dateString);
-        if (Number.isNaN(parsed.getTime())) {
-            return "";
-        }
-        return parsed.toISOString().slice(0, 10);
-    }
-
-    function formatDate(value) {
-        return new Date(value).toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-        });
+        recordsSummary.textContent = filteredCount === total ? `Total records: ${total}` : `Showing ${filteredCount} of ${total} records`;
     }
 
     function updateStats(items) {
         const confirmed = items.filter((item) => item.status === "Confirmed").length;
         const pending = items.filter((item) => item.status === "Pending").length;
         const cancelled = items.filter((item) => item.status === "Cancelled").length;
-        statToday.textContent = String(items.length);
+        const today = new Date().toISOString().slice(0, 10);
+        statToday.textContent = String(items.filter((item) => item.dateRaw === today).length);
         statConfirmed.textContent = String(confirmed);
         statPending.textContent = String(pending);
         statCancelled.textContent = String(cancelled);
@@ -137,19 +158,18 @@
             .map((appointment) => {
                 const isToday = appointment.dateRaw === today;
                 return `
-            <tr class="${isToday ? "today-row" : ""}">
-                <td>${appointment.name}</td>
-                <td>${appointment.doctor}</td>
-                <td>${appointment.department}</td>
-                <td>${appointment.dateDisplay}</td>
-                <td>${appointment.time}</td>
-                <td><span class="patient-status" aria-label="${appointment.status}">${appointment.status}</span></td>
-                <td>
-                    <button type="button" class="btn btn-outline small edit-appointment-btn" data-id="${appointment.id}">Edit</button>
-                    <button type="button" class="btn btn-outline small delete-appointment-btn" data-id="${appointment.id}">Delete</button>
-                </td>
-            </tr>
-        `;
+                    <tr class="${isToday ? "today-row" : ""}">
+                        <td>${appointment.name}</td>
+                        <td>${appointment.doctor}</td>
+                        <td>${appointment.department}</td>
+                        <td>${appointment.dateDisplay || appointment.dateRaw}</td>
+                        <td>${appointment.time}</td>
+                        <td><span class="patient-status" aria-label="${appointment.status}">${appointment.status}</span></td>
+                        <td>
+                            <button type="button" class="btn btn-outline small edit-appointment-btn" data-id="${appointment.id}">Edit</button>
+                            <button type="button" class="btn btn-outline small delete-appointment-btn" data-id="${appointment.id}">Delete</button>
+                        </td>
+                    </tr>`;
             })
             .join("");
 
@@ -170,7 +190,7 @@
                 const priority = { Confirmed: 1, Pending: 2, Cancelled: 3 };
                 return (priority[a.status] - priority[b.status] || a.name.localeCompare(b.name)) * order;
             }
-            return a[key].localeCompare(b[key]) * order;
+            return String(a[key] || "").localeCompare(String(b[key] || "")) * order;
         });
         return sorted;
     }
@@ -187,8 +207,7 @@
 
     function getPageItems(sortedItems) {
         const totalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
-        currentPage = Math.min(currentPage, totalPages);
-        currentPage = Math.max(1, currentPage);
+        currentPage = Math.min(Math.max(1, currentPage), totalPages);
         const start = (currentPage - 1) * pageSize;
         const pageItems = sortedItems.slice(start, start + pageSize);
         pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
@@ -197,63 +216,153 @@
         return pageItems;
     }
 
-    async function deleteAppointment(appointmentId) {
-
-    const appointment = appointments.find(item => item.id == appointmentId);
-
-    if (!appointment) return;
-
-    if (!confirm(`Delete appointment for ${appointment.name}?`)) {
-        return;
-    }
-
-    try {
-        console.log("Deleting Appointment ID:", appointmentId);
-console.log("Sending request to:", CONFIG.SCRIPT_URL);
-
-        const response = await fetch(CONFIG.SCRIPT_URL, {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-
-                action: "deleteAppointment",
-
-                id: appointmentId
-
-            })
-
-        });
-
-        const result = await response.json();
-
-console.log("Delete Response:", result);
-
-        if (result.success) {
-
-            loadAppointments();
-
-            showToast("Appointment Deleted Successfully");
-
-        } else {
-
-            alert(result.message);
-
+    function populateForm(appointment) {
+        if (form.elements.patientName) {
+            form.elements.patientName.value = appointment.name;
         }
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Delete Failed");
-
+        if (form.elements.age) {
+            form.elements.age.value = appointment.age;
+        }
+        if (form.elements.gender) {
+            form.elements.gender.value = appointment.gender;
+        }
+        if (form.elements.doctor) {
+            form.elements.doctor.value = appointment.doctor;
+        }
+        if (form.elements.department) {
+            form.elements.department.value = appointment.department;
+        }
+        if (form.elements.date) {
+            form.elements.date.value = appointment.dateRaw;
+        }
+        if (form.elements.time) {
+            form.elements.time.value = appointment.time;
+        }
+        if (form.elements.phone) {
+            form.elements.phone.value = appointment.phone;
+        }
+        if (form.elements.status) {
+            form.elements.status.value = appointment.status;
+        }
+        if (form.elements.notes) {
+            form.elements.notes.value = appointment.notes;
+        }
     }
 
-}
+    function getFormValues() {
+        return {
+            name: (form.elements.patientName?.value || "").trim(),
+            age: (form.elements.age?.value || "").trim(),
+            gender: (form.elements.gender?.value || "").trim(),
+            doctor: (form.elements.doctor?.value || "").trim(),
+            department: (form.elements.department?.value || "").trim(),
+            date: form.elements.date?.value || "",
+            time: form.elements.time?.value || "",
+            phone: (form.elements.phone?.value || "").trim(),
+            status: (form.elements.status?.value || "").trim(),
+            notes: (form.elements.notes?.value || "").trim(),
+        };
+    }
+
+    function validateForm() {
+        const requiredFields = [
+            form.elements.patientName,
+            form.elements.age,
+            form.elements.gender,
+            form.elements.doctor,
+            form.elements.department,
+            form.elements.date,
+            form.elements.time,
+            form.elements.phone,
+            form.elements.status,
+        ];
+        const invalidInputs = requiredFields.filter((field) => field && !String(field.value || "").trim());
+        invalidInputs.forEach((field) => field.classList.add("input-error"));
+        return invalidInputs.length === 0;
+    }
+
+    async function requestJson(url, options) {
+        try {
+            const response = await fetch(url, options);
+            const text = await response.text();
+            try {
+                return text ? JSON.parse(text) : {};
+            } catch (error) {
+                return { success: false, message: text || "Unexpected response from server" };
+            }
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: "Unable to reach the backend service." };
+        }
+    }
+
+    async function loadAppointments() {
+        setLoading(true);
+        try {
+            const result = await requestJson(`${CONFIG.SCRIPT_URL}?action=appointments`);
+            if (result.success && Array.isArray(result.data)) {
+                appointments = result.data.map(buildAppointment);
+            } else {
+                appointments = createFallbackAppointments();
+                showToast(result.message || "Using offline appointment data.");
+            }
+        } catch (error) {
+            console.error(error);
+            appointments = createFallbackAppointments();
+        } finally {
+            setLoading(false);
+            window.__RK_APPOINTMENTS__ = appointments;
+            window.dispatchEvent(new CustomEvent("rk-data-updated"));
+            applyFilters();
+        }
+    }
+
+    async function saveAppointment(values) {
+        setLoading(true);
+        const action = editingAppointmentId !== null ? "updateAppointment" : "addAppointment";
+        const payload = {
+            action,
+            data: editingAppointmentId !== null
+                ? { id: editingAppointmentId, ...values }
+                : values,
+        };
+        const result = await requestJson(CONFIG.SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+        setLoading(false);
+        if (result.success) {
+            await loadAppointments();
+            closeModal();
+            showToast(editingAppointmentId !== null ? "Appointment Updated Successfully" : "Appointment Saved Successfully");
+        } else {
+            showToast(result.message || "Unable to save appointment");
+        }
+    }
+
+    async function deleteAppointment(appointmentId) {
+        const appointment = appointments.find((item) => Number(item.id) === Number(appointmentId));
+        if (!appointment) {
+            return;
+        }
+        if (!window.confirm(`Delete appointment for ${appointment.name}?`)) {
+            return;
+        }
+        setLoading(true);
+        const result = await requestJson(CONFIG.SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "deleteAppointment", data: { id: appointmentId } }),
+        });
+        setLoading(false);
+        if (result.success) {
+            await loadAppointments();
+            showToast("Appointment Deleted Successfully");
+        } else {
+            showToast(result.message || "Unable to delete appointment");
+        }
+    }
 
     function applyFilters() {
         const query = searchInput.value.trim().toLowerCase();
@@ -262,7 +371,7 @@ console.log("Delete Response:", result);
 
         const filtered = appointments.filter((appointment) => {
             const textMatched = [appointment.name, appointment.doctor, appointment.department].some((value) =>
-                value.toLowerCase().includes(query)
+                String(value).toLowerCase().includes(query)
             );
             const statusMatched = selectedStatus === "All" || appointment.status === selectedStatus;
             const dateMatched = !selectedDate || appointment.dateRaw === selectedDate;
@@ -274,279 +383,27 @@ console.log("Delete Response:", result);
         renderAppointments(pageItems, filtered);
     }
 
-    function populateForm(appointment) {
-        form.patientName.value = appointment.name;
-        form.age.value = appointment.age;
-        form.gender.value = appointment.gender;
-        form.doctor.value = appointment.doctor;
-        form.department.value = appointment.department;
-        form.date.value = appointment.dateRaw;
-        form.time.value = appointment.time;
-        form.phone.value = appointment.phone;
-        form.status.value = appointment.status;
-        form.notes.value = appointment.notes;
-    }
-
-    function addAppointment(values) {
-        const appointment = {
-            id: nextAppointmentId++,
-            name: values.name,
-            doctor: values.doctor,
-            department: values.department,
-            dateRaw: values.date,
-            dateDisplay: formatDate(values.date),
-            time: values.time,
-            status: values.status,
-            age: values.age,
-            gender: values.gender,
-            phone: values.phone,
-            notes: values.notes,
-        };
-
-        appointments.push(appointment);
-        setLoading(true);
-        window.setTimeout(() => {
-            applyFilters();
-            setLoading(false);
-        }, 180);
-    }
-
-    function updateAppointment(values) {
-        const appointment = appointments.find((item) => item.id === editingAppointmentId);
+    function loadForEdit(appointmentId) {
+        const appointment = appointments.find((item) => Number(item.id) === Number(appointmentId));
         if (!appointment) {
+            showToast("Appointment not found");
             return;
         }
-
-        appointment.name = values.name;
-        appointment.age = values.age;
-        appointment.gender = values.gender;
-        appointment.doctor = values.doctor;
-        appointment.department = values.department;
-        appointment.dateRaw = values.date;
-        appointment.dateDisplay = formatDate(values.date);
-        appointment.time = values.time;
-        appointment.phone = values.phone;
-        appointment.status = values.status;
-        appointment.notes = values.notes;
-        setLoading(true);
-        window.setTimeout(() => {
-            applyFilters();
-            setLoading(false);
-        }, 180);
+        editingAppointmentId = Number(appointment.id);
+        populateForm(appointment);
+        submitButton.textContent = "Update Appointment";
+        openModal();
     }
-
-    function loadForEdit(appointmentId) {
-
-    console.log("loadForEdit called");
-
-    console.log("Received ID:", appointmentId);
-
-    console.log("Appointments:", appointments);
-
-    const appointment = appointments.find(item => item.id == appointmentId);
-
-    console.log("Found:", appointment);
-
-    if (!appointment) {
-
-        alert("Appointment not found");
-
-        return;
-
-    }
-
-    editingAppointmentId = appointment.id;
-
-    populateForm(appointment);
-
-    submitButton.textContent = "Update Appointment";
-
-    openModal();
-
-}
 
     function handleSubmit(event) {
         event.preventDefault();
         clearValidation();
-
-        const values = {
-            name: form.patientName.value.trim(),
-            age: form.age.value.trim(),
-            gender: form.gender.value.trim(),
-            doctor: form.doctor.value.trim(),
-            department: form.department.value.trim(),
-            date: form.date.value,
-            time: form.time.value,
-            phone: form.phone.value.trim(),
-            status: form.status.value.trim(),
-            notes: form.notes.value.trim(),
-        };
-
-        const requiredFields = [
-            form.patientName,
-            form.age,
-            form.gender,
-            form.doctor,
-            form.department,
-            form.date,
-            form.time,
-            form.phone,
-            form.status,
-        ];
-
-        const invalidInputs = requiredFields.filter((field) => !field.value.trim());
-        if (invalidInputs.length > 0) {
-            invalidInputs.forEach((field) => field.classList.add("input-error"));
+        const values = getFormValues();
+        if (!validateForm()) {
             showToast("Please complete all required fields before saving.");
             return;
         }
-
-           if (editingAppointmentId !== null) {
-
-    console.log("Updating ID:", editingAppointmentId);
-
-    console.log("Updating Data:", {
-        id: editingAppointmentId,
-        patientName: values.name,
-        age: values.age,
-        gender: values.gender,
-        doctor: values.doctor,
-        department: values.department,
-        date: values.date,
-        time: values.time,
-        phone: values.phone,
-        status: values.status,
-        notes: values.notes
-    });
-
-    
-    fetch(CONFIG.SCRIPT_URL, {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-
-            action: "updateAppointment",
-
-            data: {
-
-                id: editingAppointmentId,
-
-                patientName: values.name,
-                age: values.age,
-                gender: values.gender,
-                doctor: values.doctor,
-                department: values.department,
-                date: values.date,
-                time: values.time,
-                phone: values.phone,
-                status: values.status,
-                notes: values.notes
-
-            }
-
-        })
-
-    })
-
-    .then(res => res.json())
-
-    .then(result => {
-
-    console.log("Backend Response:", result);
-
-    if (result.success) {
-
-            loadAppointments();
-
-            closeModal();
-
-            showToast("Appointment Updated Successfully ✅");
-
-        } else {
-
-            showToast(result.message);
-
-        }
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-        showToast("Update Failed");
-
-    });
-
-} else {
-console.log("Sending Data:", {
-    action: "addAppointment",
-    data: {
-        patientName: values.name,
-        age: values.age,
-        gender: values.gender,
-        doctor: values.doctor,
-        department: values.department,
-        date: values.date,
-        time: values.time,
-        phone: values.phone,
-        status: values.status,
-        notes: values.notes
-    }
-});
-    fetch(CONFIG.SCRIPT_URL, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        action: "addAppointment",
-        data: {
-            patientName: values.name,
-            age: values.age,
-            gender: values.gender,
-            doctor: values.doctor,
-            department: values.department,
-            date: values.date,
-            time: values.time,
-            phone: values.phone,
-            status: values.status,
-            notes: values.notes
-        }
-    })
-})
-.then(res => res.json())
-.then(result => {
-
-    if(result.success){
-
-        addAppointment(values);
-
-        closeModal();
-
-        showToast("Appointment Saved Successfully ✅");
-
-    }else{
-
-        showToast(result.message);
-
-    }
-
-})
-.catch(error => {
-
-    console.error(error);
-
-    showToast("Backend Connection Failed");
-
-});    
-
-}
+        saveAppointment(values);
     }
 
     openButton.addEventListener("click", function () {
@@ -572,18 +429,14 @@ console.log("Sending Data:", {
 
     tableBody.addEventListener("click", function (event) {
         const editButton = event.target.closest(".edit-appointment-btn");
-        console.log("Edit button:", editButton);
         if (editButton) {
-            const appointmentId = editButton.dataset.id;
-            loadForEdit(appointmentId);
+            loadForEdit(editButton.dataset.id);
             return;
         }
 
         const deleteButton = event.target.closest(".delete-appointment-btn");
         if (deleteButton) {
-            const appointmentId = deleteButton.dataset.id;
-            deleteAppointment(appointmentId);
-            return;
+            deleteAppointment(deleteButton.dataset.id);
         }
     });
 
@@ -613,59 +466,25 @@ console.log("Sending Data:", {
     });
 
     [searchInput, statusFilter, dateFilter].forEach((input) => {
-        input.addEventListener("input", applyFilters);
-        input.addEventListener("change", applyFilters);
+        input.addEventListener("input", () => {
+            currentPage = 1;
+            applyFilters();
+        });
+        input.addEventListener("change", () => {
+            currentPage = 1;
+            applyFilters();
+        });
     });
 
     resetFiltersBtn.addEventListener("click", function () {
         searchInput.value = "";
         statusFilter.value = "All";
         dateFilter.value = "";
+        currentPage = 1;
         applyFilters();
     });
-    async function loadAppointments() {
 
-    try {
-
-        const response = await fetch(
-            CONFIG.SCRIPT_URL + "?action=appointments"
-        );
-
-        const result = await response.json();
-
-        if(result.success){
-
-            appointments = result.data.map(item => ({
-
-                id: item.id,
-                name: item.patientName,
-                age: item.age,
-                gender: item.gender,
-                doctor: item.doctor,
-                department: item.department,
-                dateRaw: item.date,
-                dateDisplay: formatDate(item.date),
-                time: item.time,
-                phone: item.phone,
-                status: item.status,
-                notes: item.notes
-
-            }));
-
-            nextAppointmentId = appointments.length;
-
-            applyFilters();
-
-        }
-
-    } catch(error){
-
-        console.error(error);
-
-    }
-
-}
     form.addEventListener("submit", handleSubmit);
-
-loadAppointments();
+    updateSortHeaders();
+    loadAppointments();
 });
