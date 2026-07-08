@@ -56,15 +56,49 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${app.doctor}</td>
                 <td>${app.department}</td>
                 <td>${app.date}</td>
-                <td>${app.time}</td>
+<td>${app.time}</td>
                 <td>${app.status}</td>
-                <td>Edit | Delete</td>
+                <td>
+    <button class="edit-btn" data-id="${app.id}">Edit</button>
+    <button class="delete-btn" data-id="${app.id}">Delete</button>
+</td>
             </tr>
         `;
 
     });
 
 }
+function formatDate(dateString) {
+
+    const date = new Date(dateString);
+
+    return date.toLocaleDateString("en-GB");
+
+}
+
+function formatTime(timeString) {
+
+    const date = new Date(timeString);
+
+    return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+
+}
+
+document.addEventListener("click", (e) => {
+
+    if (e.target.classList.contains("edit-btn")) {
+
+        const id = e.target.dataset.id;
+
+        console.log("Edit Clicked:", id);
+
+    }
+
+});
 
     loadAppointments();
 
