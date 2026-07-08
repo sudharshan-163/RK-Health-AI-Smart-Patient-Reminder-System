@@ -348,12 +348,23 @@
     closeModal();
     showToast("Appointment Updated Successfully");
 } else {
-
+console.log("Sending Data:", {
+    action: "addAppointment",
+    data: {
+        patientName: values.name,
+        age: values.age,
+        gender: values.gender,
+        doctor: values.doctor,
+        department: values.department,
+        date: values.date,
+        time: values.time,
+        phone: values.phone,
+        status: values.status,
+        notes: values.notes
+    }
+});
     fetch(CONFIG.SCRIPT_URL, {
     method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
     body: JSON.stringify({
         action: "addAppointment",
         data: {
