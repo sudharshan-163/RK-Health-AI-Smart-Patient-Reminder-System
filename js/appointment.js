@@ -472,8 +472,49 @@
         dateFilter.value = "";
         applyFilters();
     });
+    async function loadAppointments() {
 
+    try {
+
+        const response = await fetch(
+            CONFIG.SCRIPT_URL + "?action=appointments"
+        );
+
+        const result = await response.json();
+
+        if(result.success){
+
+            appointments = result.data.map(item => ({
+
+                id: item.id,
+                name: item.patientName,
+                age: item.age,
+                gender: item.gender,
+                doctor: item.doctor,
+                department: item.department,
+                dateRaw: item.date,
+                dateDisplay: formatDate(item.date),
+                time: item.time,
+                phone: item.phone,
+                status: item.status,
+                notes: item.notes
+
+            }));
+
+            nextAppointmentId = appointments.length;
+
+            applyFilters();
+
+        }
+
+    } catch(error){
+
+        console.error(error);
+
+    }
+
+}
     form.addEventListener("submit", handleSubmit);
-    parseExistingRows();
-    applyFilters();
+
+loadAppointments();
 });
