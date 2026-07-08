@@ -1,0 +1,358 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Patient Summary - RK Health</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+<body>
+  <div class="dashboard-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo">RK</div>
+        <div>
+          <h1>RK Health</h1>
+          <p>AI Patient Appointment & Medication Reminder System</p>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Overview</a></li>
+          <li><a href="appointment.html" class="nav-link">Appointments</a></li>
+          <li><a href="medication.html" class="nav-link">Medications</a></li>
+          <li><a href="report.html" class="nav-link">Reports</a></li>
+          <li><a href="summary.html" class="nav-link active">AI Summary</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="topbar-left">
+          <p>AI Patient Summary</p>
+          <h2>AI-generated health insights, appointment recommendations and medication adherence analysis.</h2>
+        </div>
+
+        <div class="topbar-actions">
+          <form class="search-box" role="search">
+            <label for="search-summaries" class="sr-only">Search patient summaries</label>
+            <input id="search-summaries" type="search" placeholder="Search patient summaries..." />
+          </form>
+
+          <button class="action-button" id="generate-summary-btn">
+            <span class="action-icon">🤖</span>
+            + Generate AI Summary
+          </button>
+        </div>
+      </header>
+
+      <section class="stats-grid" id="overview" aria-label="Key metrics">
+        <article class="stat-card stat-card--blue">
+          <span class="label">AI Summaries Generated</span>
+          <p class="value">1,024</p>
+        </article>
+
+        <article class="stat-card stat-card--green">
+          <span class="label">High Risk Patients</span>
+          <p class="value">42</p>
+        </article>
+
+        <article class="stat-card stat-card--orange">
+          <span class="label">Medication Adherence</span>
+          <p class="value">88%</p>
+        </article>
+
+        <article class="stat-card stat-card--red">
+          <span class="label">AI Accuracy Score</span>
+          <p class="value">94%</p>
+        </article>
+      </section>
+
+      <section id="actions" class="quick-actions" aria-label="Quick actions">
+        <article class="quick-card action-card">
+          <span class="action-icon">⚡</span>
+          <h3>Generate New AI Summary</h3>
+          <p>Run AI analysis across selected patient records and generate a concise summary.</p>
+        </article>
+
+        <article class="quick-card action-card">
+          <span class="action-icon">📈</span>
+          <h3>Predict Health Risk</h3>
+          <p>Use AI to predict near-term risks and flag patients for follow-up.</p>
+        </article>
+
+        <article class="quick-card action-card">
+          <span class="action-icon">📤</span>
+          <h3>Export AI Report</h3>
+          <p>Export AI summary batches to PDF or CSV for clinical review.</p>
+        </article>
+      </section>
+
+      <section class="cards-grid">
+        <div>
+          <article class="appointments-card summary-panel">
+            <div class="section-header">
+              <h3>AI Patient Summaries</h3>
+              <a href="#" id="export-summary-report">Export All</a>
+            </div>
+
+            <div class="filter-panel" style="margin-bottom:16px; gap:12px; display:flex; flex-wrap:wrap; align-items:center;">
+              <div class="filter-panel-group" style="flex:1; min-width:220px;">
+                <label for="search-summaries" class="sr-only">Search summaries</label>
+                <input id="search-summaries" type="search" placeholder="Search patient summaries..." />
+              </div>
+              <div class="filter-panel-group" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" id="prev-summary-page" class="btn btn-outline small">Previous</button>
+                <span id="summary-page-indicator">Page 1</span>
+                <button type="button" id="next-summary-page" class="btn btn-outline small">Next</button>
+              </div>
+            </div>
+
+            <div class="summary-list" id="summary-list">
+              <article class="summary-card">
+                <div class="summary-card-top">
+                  <div class="summary-avatar">EW</div>
+                  <div class="summary-card-title">
+                    <strong>Emma Walker</strong>
+                    <span>62 · Type 2 Diabetes</span>
+                  </div>
+                  <div class="summary-badge medium">Medium</div>
+                </div>
+                <div class="summary-card-meta">
+                  <span>Current Meds: Metformin 500mg, Insulin (basal)</span>
+                  <span>Last Appointment: 2026-07-06</span>
+                  <span>Next Appointment: 2026-07-20</span>
+                </div>
+                <div class="summary-card-body">
+                  <p><strong>AI Summary:</strong> The model identifies elevated fasting glucose trends over the past three visits with inconsistent post-prandial control. Weight has increased slightly, and blood pressure remains within target. Risk of microvascular complications is moderate given HbA1c trend.</p>
+                  <p><strong>Recommendation:</strong> Schedule diabetes education, consider medication timing review, and increase follow-up frequency to 2 weeks.</p>
+                </div>
+                <div class="summary-card-footer">
+                  <span class="summary-confidence">Confidence: 92%</span>
+                </div>
+              </article>
+
+              <article class="summary-card">
+                <div class="summary-card-top">
+                  <div class="summary-avatar">NP</div>
+                  <div class="summary-card-title">
+                    <strong>Noah Patel</strong>
+                    <span>48 · Hypertension</span>
+                  </div>
+                  <div class="summary-badge low">Low</div>
+                </div>
+                <div class="summary-card-meta">
+                  <span>Current Meds: Amlodipine 5mg</span>
+                  <span>Last Appointment: 2026-07-05</span>
+                  <span>Next Appointment: 2026-07-22</span>
+                </div>
+                <div class="summary-card-body">
+                  <p><strong>AI Summary:</strong> Blood pressure readings show intermittent elevations with occasional missed doses. Recent lipid panel is borderline high. Lifestyle factors including low activity and high-sodium diet are contributing.</p>
+                  <p><strong>Recommendation:</strong> Reinforce medication reminders, consider home BP monitoring, and dietary counseling.</p>
+                </div>
+                <div class="summary-card-footer">
+                  <span class="summary-confidence">Confidence: 95%</span>
+                </div>
+              </article>
+
+              <article class="summary-card">
+                <div class="summary-card-top">
+                  <div class="summary-avatar">SL</div>
+                  <div class="summary-card-title">
+                    <strong>Sophia Lee</strong>
+                    <span>71 · COPD</span>
+                  </div>
+                  <div class="summary-badge high">High</div>
+                </div>
+                <div class="summary-card-meta">
+                  <span>Current Meds: Salbutamol PRN, Tiotropium</span>
+                  <span>Last Appointment: 2026-07-04</span>
+                  <span>Next Appointment: 2026-07-25</span>
+                </div>
+                <div class="summary-card-body">
+                  <p><strong>AI Summary:</strong> Exacerbation risk increased due to recent cough and reduced inhaler adherence. Oxygen saturation is borderline during activity. Medication refill gaps were detected in the last 60 days.</p>
+                  <p><strong>Recommendation:</strong> Schedule inhaler training, ensure medication refills, and implement an exacerbation action plan.</p>
+                </div>
+                <div class="summary-card-footer">
+                  <span class="summary-confidence">Confidence: 88%</span>
+                </div>
+              </article>
+
+              <article class="summary-card">
+                <div class="summary-card-top">
+                  <div class="summary-avatar">MB</div>
+                  <div class="summary-card-title">
+                    <strong>Michael Brown</strong>
+                    <span>55 · Hyperlipidemia</span>
+                  </div>
+                  <div class="summary-badge low">Low</div>
+                </div>
+                <div class="summary-card-meta">
+                  <span>Current Meds: Atorvastatin 20mg</span>
+                  <span>Last Appointment: 2026-07-03</span>
+                  <span>Next Appointment: 2026-07-30</span>
+                </div>
+                <div class="summary-card-body">
+                  <p><strong>AI Summary:</strong> LDL remains above target despite therapy; lifestyle factors show limited exercise. Medication adherence appears consistent. AI recommends intensifying lipid-lowering strategy and repeating the lipid panel.</p>
+                  <p><strong>Recommendation:</strong> Consider dose adjustment or addition of non-statin therapy and dietary counseling.</p>
+                </div>
+                <div class="summary-card-footer">
+                  <span class="summary-confidence">Confidence: 90%</span>
+                </div>
+              </article>
+
+              <article class="summary-card">
+                <div class="summary-card-top">
+                  <div class="summary-avatar">AJ</div>
+                  <div class="summary-card-title">
+                    <strong>Ava Johnson</strong>
+                    <span>36 · Asthma</span>
+                  </div>
+                  <div class="summary-badge medium">Medium</div>
+                </div>
+                <div class="summary-card-meta">
+                  <span>Current Meds: Budesonide inhaler, Salbutamol PRN</span>
+                  <span>Last Appointment: 2026-07-02</span>
+                  <span>Next Appointment: 2026-07-18</span>
+                </div>
+                <div class="summary-card-body">
+                  <p><strong>AI Summary:</strong> Recent increase in rescue inhaler use suggests suboptimal control. Seasonal allergy triggers are present. AI flags medium risk for exacerbation and recommends stepping up controller therapy.</p>
+                  <p><strong>Recommendation:</strong> Evaluate inhaler technique, consider short-term controller escalation, and schedule follow-up in 2 weeks.</p>
+                </div>
+                <div class="summary-card-footer">
+                  <span class="summary-confidence">Confidence: 89%</span>
+                </div>
+              </article>
+
+              <article class="summary-card">
+                <div class="summary-card-top">
+                  <div class="summary-avatar">LK</div>
+                  <div class="summary-card-title">
+                    <strong>Liam Kelly</strong>
+                    <span>67 · Heart Failure</span>
+                  </div>
+                  <div class="summary-badge high">High</div>
+                </div>
+                <div class="summary-card-meta">
+                  <span>Current Meds: ACE inhibitor, Beta blocker</span>
+                  <span>Last Appointment: 2026-07-01</span>
+                  <span>Next Appointment: 2026-07-21</span>
+                </div>
+                <div class="summary-card-body">
+                  <p><strong>AI Summary:</strong> Recent notes indicate mild fluid retention and weight gain over two weeks. Diuretic adherence appears variable. AI flags the patient as high priority for medication reconciliation.</p>
+                  <p><strong>Recommendation:</strong> Arrange urgent weight check, consider earlier clinic review, and optimize medication dosing.</p>
+                </div>
+                <div class="summary-card-footer">
+                  <span class="summary-confidence">Confidence: 86%</span>
+                </div>
+              </article>
+            </div>
+            <div id="summary-no-results" class="table-empty hidden">No summaries found</div>
+          </article>
+        </div>
+
+        <aside>
+          <article class="patient-list report-card summary-panel">
+            <div class="section-header">
+              <h3>Recent AI Activity</h3>
+              <a href="#">See all</a>
+            </div>
+
+            <div class="activity-card">
+              <div class="patient-avatar">DB</div>
+              <div class="patient-info">
+                <strong>Generated Diabetes Summary</strong>
+                <p>Emma Walker · 2026-07-06</p>
+              </div>
+              <div class="patient-status" aria-label="Reminder Sent">Generated</div>
+            </div>
+
+            <div class="activity-card">
+              <div class="patient-avatar">BP</div>
+              <div class="patient-info">
+                <strong>Generated Blood Pressure Risk</strong>
+                <p>Noah Patel · 2026-07-05</p>
+              </div>
+              <div class="patient-status" aria-label="Confirmed">Completed</div>
+            </div>
+
+            <div class="activity-card">
+              <div class="patient-avatar">MR</div>
+              <div class="patient-info">
+                <strong>Generated Medication Reminder</strong>
+                <p>Multiple patients · 2026-07-04</p>
+              </div>
+              <div class="patient-status" aria-label="Pending">Pending</div>
+            </div>
+
+            <div class="activity-card">
+              <div class="patient-avatar">AR</div>
+              <div class="patient-info">
+                <strong>Generated Appointment Recommendation</strong>
+                <p>Liam Kelly · 2026-07-01</p>
+              </div>
+              <div class="patient-status" aria-label="Confirmed">Completed</div>
+            </div>
+          </article>
+
+          <article class="report-card summary-panel" style="margin-top:14px">
+            <div class="section-header">
+              <h3>AI Insights</h3>
+              <a href="#">Details</a>
+            </div>
+
+            <div class="panel-row">
+              <div>
+                <div class="kicker">Total Patients Analysed</div>
+                <div class="panel-value">12,430</div>
+              </div>
+            </div>
+
+            <div class="panel-row">
+              <div>
+                <div class="kicker">AI Reports Generated Today</div>
+                <div class="panel-meter"><span style="width:46%"></span></div>
+                <div class="panel-value">478</div>
+              </div>
+            </div>
+
+            <div class="panel-row">
+              <div>
+                <div class="kicker">Upcoming Critical Cases</div>
+                <div class="panel-meter"><span class="panel-fill-red" style="width:18%"></span></div>
+                <div class="panel-value">42</div>
+              </div>
+            </div>
+
+            <div class="panel-row">
+              <div>
+                <div class="kicker">Medication Compliance</div>
+                <div class="panel-meter"><span class="panel-fill-orange" style="width:88%"></span></div>
+                <div class="panel-value">88%</div>
+              </div>
+            </div>
+
+            <div class="panel-row">
+              <div>
+                <div class="kicker">Hospital Health Score</div>
+                <div class="panel-meter"><span class="panel-fill-blue" style="width:76%"></span></div>
+                <div class="panel-value">76</div>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer-note">
+    <p>© 2026 RK Health. All rights reserved.</p>
+    <p>Unified dashboard for patient care, reminders, and analytics.</p>
+  </footer>
+
+  <script src="js/summary.js"></script>
+</body>
+</html>

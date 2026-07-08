@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RK Health – AI Smart Patient Appointment & Medication Reminder System</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+
+<body>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo">RK</div>
+
+                <div>
+                    <h1>RK Health</h1>
+                    <p>AI Patient Appointment & Medication Reminder System</p>
+                </div>
+            </div>
+    
+    <nav>
+        <ul class="nav-links">
+            <li><a href="#overview" class="nav-link">Overview</a></li>
+            <li><a href="#patients" class="nav-link">Patients</a></li>
+            <li><a href="#appointments" class="nav-link">Appointments</a></li>
+            <li><a href="#reports" class="nav-link">Reports</a></li>
+        </ul>
+    </nav>
+    </aside>
+
+    <main>
+        <header class="topbar">
+            <div class="topbar-left">
+                <p>Healthcare Intelligence</p>
+                <h2>Trusted patient reminders, appointments, and summaries</h2>
+            </div>
+            <div class="topbar-actions">
+                <form class="search-box" role="search">
+                    <label for="search-patients" class="sr-only">Search patients</label>
+                    <input id="search-patients" type="search" placeholder="Search patients" />
+                </form>
+            </div>
+        </header>
+
+        <section class="stats-grid" id="overview" aria-label="Key metrics">
+            <article class="stat-card">
+                <span class="label">Today's Appointments</span>
+                <p class="value">0</p>
+            </article>
+            <article class="stat-card">
+                <span class="label">Pending Medicines</span>
+                <p class="value">0</p>
+            </article>
+            <article class="stat-card">
+                <span class="label">AI Summaries</span>
+                <p class="value">0</p>
+            </article>
+            <article class="stat-card">
+                <span class="label">Health Reports</span>
+                <p class="value">0</p>
+            </article>
+        </section>
+
+        <section class="quick-actions" id="actions" aria-label="Quick actions">
+            <article class="quick-card">
+                <h3>Schedule Appointment</h3>
+                <p>Create a new patient visit and confirm availability.</p>
+            </article>
+            <article class="quick-card">
+                <h3>Send Reminder</h3>
+                <p>Dispatch medication and appointment notifications instantly.</p>
+            </article>
+            <article class="quick-card">
+                <h3>View Reports</h3>
+                <p>Open patient trends, adherence, and summary analytics.</p>
+            </article>
+        </section>
+
+        <section class="cards-grid" aria-label="Clinical services">
+            <article class="appointments-card" id="appointments">
+                <h3>Upcoming Appointments</h3>
+                <ul>
+                    <li>10:00 AM — Emma Walker</li>
+                    <li>11:30 AM — Noah Patel</li>
+                    <li>1:00 PM — Sophia Lee</li>
+                </ul>
+            </article>
+            <article class="patient-list" id="patients">
+                <h3>Recent Patients</h3>
+                <div class="patient-card">
+                    <h4>Michael Chen</h4>
+                    <p>Diabetes follow-up, medication reminder due</p>
+                </div>
+                <div class="patient-card">
+                    <h4>Ava Johnson</h4>
+                    <p>Annual checkup scheduled, report summary ready</p>
+                </div>
+                <div class="patient-card">
+                    <h4>Liam Smith</h4>
+                    <p>New prescription added, reminder confirmed</p>
+                </div>
+            </article>
+        </section>
+    </main>
+    </div>
+
+    <footer class="footer-note" id="reports">
+        <p>© 2026 RK Health. All rights reserved.</p>
+        <p>Unified dashboard for patient care, reminders, and analytics.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

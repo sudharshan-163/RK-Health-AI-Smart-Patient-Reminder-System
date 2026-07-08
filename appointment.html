@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RK Health – Appointment Management</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+
+<body>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo">RK</div>
+                <div>
+                    <h1>RK Health</h1>
+                    <p>AI Patient Appointment & Medication Reminder System</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link">Overview</a></li>
+                    <li><a href="appointment.html" class="nav-link active">Appointments</a></li>
+                    <li><a href="medication.html" class="nav-link">Medications</a></li>
+                    <li><a href="report.html" class="nav-link">Reports</a></li>
+                    <li><a href="summary.html" class="nav-link">AI Summary</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <header class="topbar">
+                <div class="topbar-left">
+                    <p>Appointment Management</p>
+                    <h2>Keep every patient visit on schedule and under control.</h2>
+                </div>
+                <div class="topbar-actions">
+                    <form class="search-box" role="search">
+                        <label for="search-appointments" class="sr-only">Search appointments</label>
+                        <input id="search-appointments" type="search" placeholder="Search appointments" />
+                    </form>
+                    <button id="schedule-appointment-btn" class="action-button">+ Schedule Appointment</button>
+                </div>
+            </header>
+
+            <section class="filter-panel">
+                <div class="filter-panel-group">
+                    <label for="filter-status" class="sr-only">Filter by status</label>
+                    <select id="filter-status" class="filter-select">
+                        <option selected>All</option>
+                        <option>Confirmed</option>
+                        <option>Pending</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+                <div class="filter-panel-group">
+                    <label for="filter-date" class="sr-only">Filter by date</label>
+                    <input id="filter-date" type="date" class="filter-input" />
+                </div>
+                <button type="button" id="reset-filters-btn" class="btn btn-outline">Reset Filters</button>
+            </section>
+
+            <section class="stats-grid" aria-label="Appointment overview">
+                <article class="stat-card stat-card--blue">
+                    <span class="label">Today's Appointments</span>
+                    <p class="value" id="stat-today">18</p>
+                </article>
+                <article class="stat-card stat-card--green">
+                    <span class="label">Confirmed</span>
+                    <p class="value" id="stat-confirmed">11</p>
+                </article>
+                <article class="stat-card stat-card--orange">
+                    <span class="label">Pending</span>
+                    <p class="value" id="stat-pending">5</p>
+                </article>
+                <article class="stat-card stat-card--red">
+                    <span class="label">Cancelled</span>
+                    <p class="value" id="stat-cancelled">2</p>
+                </article>
+            </section>
+
+            <section class="quick-actions" aria-label="Quick appointment actions">
+                <article class="quick-card">
+                    <h3>Schedule Appointment</h3>
+                    <p>Book a new consultation and assign doctor availability instantly.</p>
+                </article>
+                <article class="quick-card">
+                    <h3>Send Reminder</h3>
+                    <p>Push appointment reminders to patients with one click.</p>
+                </article>
+                <article class="quick-card">
+                    <h3>Calendar View</h3>
+                    <p>Review doctor schedules, appointment slots, and clinic capacity.</p>
+                </article>
+            </section>
+
+            <section class="section-header" aria-label="Appointments table header">
+                <div>
+                    <h3>Daily Appointment Tracker</h3>
+                    <p class="table-summary" id="records-summary">Total records: 8</p>
+                </div>
+                <a href="#upcoming">Jump to upcoming</a>
+            </section>
+
+            <div class="table-responsive">
+                <table class="appointments-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="name" class="sortable">Patient Name</th>
+                            <th data-sort="doctor" class="sortable">Doctor</th>
+                            <th>Department</th>
+                            <th data-sort="dateRaw" class="sortable">Date</th>
+                            <th>Time</th>
+                            <th data-sort="status" class="sortable">Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Emma Walker</td>
+                            <td>Dr. Maya Desai</td>
+                            <td>Cardiology</td>
+                            <td>Jul 08, 2026</td>
+                            <td>09:00 AM</td>
+                            <td><span class="patient-status" aria-label="Confirmed">Confirmed</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="0">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Noah Patel</td>
+                            <td>Dr. Amir Khan</td>
+                            <td>Endocrinology</td>
+                            <td>Jul 08, 2026</td>
+                            <td>09:45 AM</td>
+                            <td><span class="patient-status" aria-label="Pending">Pending</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="1">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Sophia Lee</td>
+                            <td>Dr. Hannah Park</td>
+                            <td>Pediatrics</td>
+                            <td>Jul 08, 2026</td>
+                            <td>10:30 AM</td>
+                            <td><span class="patient-status" aria-label="Confirmed">Confirmed</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="2">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Michael Chen</td>
+                            <td>Dr. Rahul Joshi</td>
+                            <td>General Medicine</td>
+                            <td>Jul 08, 2026</td>
+                            <td>11:15 AM</td>
+                            <td><span class="patient-status" aria-label="Cancelled">Cancelled</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="3">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Ava Johnson</td>
+                            <td>Dr. Priya Mehta</td>
+                            <td>Dermatology</td>
+                            <td>Jul 08, 2026</td>
+                            <td>12:00 PM</td>
+                            <td><span class="patient-status" aria-label="Confirmed">Confirmed</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="4">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Liam Smith</td>
+                            <td>Dr. Clara Nguyen</td>
+                            <td>Neurology</td>
+                            <td>Jul 08, 2026</td>
+                            <td>01:30 PM</td>
+                            <td><span class="patient-status" aria-label="Pending">Pending</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="5">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Mia Davis</td>
+                            <td>Dr. Lucas Adams</td>
+                            <td>Orthopedics</td>
+                            <td>Jul 08, 2026</td>
+                            <td>02:15 PM</td>
+                            <td><span class="patient-status" aria-label="Confirmed">Confirmed</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="6">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td>Ethan Brown</td>
+                            <td>Dr. Leila Hassan</td>
+                            <td>Psychiatry</td>
+                            <td>Jul 08, 2026</td>
+                            <td>03:00 PM</td>
+                            <td><span class="patient-status" aria-label="Pending">Pending</span></td>
+                            <td><button type="button" class="btn btn-outline small edit-appointment-btn" data-id="7">Edit</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="no-results" class="table-empty hidden">No appointments found</div>
+                <div class="pagination-bar">
+                    <button type="button" id="prev-page" class="btn btn-outline small">Previous</button>
+                    <span id="page-indicator">Page 1</span>
+                    <button type="button" id="next-page" class="btn btn-outline small">Next</button>
+                </div>
+                <div class="loading-overlay hidden" id="loading-overlay" aria-hidden="true">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <section class="cards-grid" aria-label="Appointment panels">
+                <article class="appointments-card" id="upcoming">
+                    <div class="section-header">
+                        <h3>Upcoming Appointments</h3>
+                        <a href="#">View all</a>
+                    </div>
+                    <ul>
+                        <li>
+                            <span><strong>09:00 AM</strong> — Emma Walker</span>
+                            <span class="patient-status" aria-label="Confirmed">Confirmed</span>
+                        </li>
+                        <li>
+                            <span><strong>09:45 AM</strong> — Noah Patel</span>
+                            <span class="patient-status" aria-label="Pending">Pending</span>
+                        </li>
+                        <li>
+                            <span><strong>10:30 AM</strong> — Sophia Lee</span>
+                            <span class="patient-status" aria-label="Confirmed">Confirmed</span>
+                        </li>
+                        <li>
+                            <span><strong>11:15 AM</strong> — Michael Chen</span>
+                            <span class="patient-status" aria-label="Cancelled">Cancelled</span>
+                        </li>
+                        <li>
+                            <span><strong>12:00 PM</strong> — Ava Johnson</span>
+                            <span class="patient-status" aria-label="Confirmed">Confirmed</span>
+                        </li>
+                    </ul>
+                </article>
+
+                <article class="patient-list" aria-label="Recent appointment activity">
+                    <div class="section-header">
+                        <h3>Recent Activity</h3>
+                        <a href="#">See history</a>
+                    </div>
+                    <div class="patient-card">
+                        <div class="patient-avatar">EK</div>
+                        <div class="patient-info">
+                            <strong>Reminder sent</strong>
+                            <p>Ekaterina Kim received visit reminder for 10:00 AM.</p>
+                        </div>
+                    </div>
+                    <div class="patient-card">
+                        <div class="patient-avatar">JB</div>
+                        <div class="patient-info">
+                            <strong>Appointment confirmed</strong>
+                            <p>Jonas Brooks confirmed his cardiology consultation.</p>
+                        </div>
+                    </div>
+                    <div class="patient-card">
+                        <div class="patient-avatar">LM</div>
+                        <div class="patient-info">
+                            <strong>Schedule updated</strong>
+                            <p>Lina Morgan moved to 02:15 PM for orthopedic review.</p>
+                        </div>
+                    </div>
+                    <div class="patient-card">
+                        <div class="patient-avatar">SR</div>
+                        <div class="patient-info">
+                            <strong>Cancellation noted</strong>
+                            <p>Samuel Reed cancelled his neurology consultation.</p>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <div class="modal-overlay" id="appointment-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <div class="modal-card" role="document">
+                    <div class="modal-header">
+                        <div>
+                            <p class="kicker">New appointment</p>
+                            <h3 id="modal-title">Schedule Appointment</h3>
+                        </div>
+                        <button type="button" class="btn btn-outline" id="cancel-appointment-btn">Cancel</button>
+                    </div>
+                    <form id="appointment-form">
+                        <div class="modal-grid">
+                            <div class="modal-group">
+                                <label for="patient-name">Patient Name</label>
+                                <input id="patient-name" name="patientName" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="patient-age">Age</label>
+                                <input id="patient-age" name="age" type="number" min="0" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="patient-gender">Gender</label>
+                                <select id="patient-gender" name="gender" required>
+                                    <option value="">Select gender</option>
+                                    <option>Female</option>
+                                    <option>Male</option>
+                                    <option>Non-binary</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="modal-group">
+                                <label for="patient-doctor">Doctor</label>
+                                <input id="patient-doctor" name="doctor" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="patient-department">Department</label>
+                                <input id="patient-department" name="department" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="appointment-date">Appointment Date</label>
+                                <input id="appointment-date" name="date" type="date" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="appointment-time">Appointment Time</label>
+                                <input id="appointment-time" name="time" type="time" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="patient-phone">Phone Number</label>
+                                <input id="patient-phone" name="phone" type="tel" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="appointment-status">Appointment Status</label>
+                                <select id="appointment-status" name="status" required>
+                                    <option value="">Select status</option>
+                                    <option>Confirmed</option>
+                                    <option>Pending</option>
+                                </select>
+                            </div>
+                            <div class="modal-group modal-full">
+                                <label for="appointment-notes">Notes</label>
+                                <textarea id="appointment-notes" name="notes" placeholder="Optional notes"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" id="cancel-appointment-btn-bottom">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Appointment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer-note">
+        <p>© 2026 RK Health. All rights reserved.</p>
+        <p>Trusted appointment management for smarter patient care.</p>
+    </footer>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="js/appointment.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reports & Analytics - RK Health</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+<body>
+  <div class="dashboard-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo">RK</div>
+        <div>
+          <h1>RK Health</h1>
+          <p>AI Patient Appointment & Medication Reminder System</p>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Overview</a></li>
+          <li><a href="appointment.html" class="nav-link">Appointments</a></li>
+          <li><a href="medication.html" class="nav-link">Medications</a></li>
+          <li><a href="report.html" class="nav-link active">Reports</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="topbar-left">
+          <p>Reports & Analytics</p>
+          <h2>View patient statistics, appointment analytics and healthcare reports.</h2>
+        </div>
+
+        <div class="topbar-actions">
+          <form class="search-box" role="search">
+            <label for="search-reports" class="sr-only">Search reports</label>
+            <input id="search-reports" type="search" placeholder="Search reports..." />
+          </form>
+
+          <button class="action-button" id="generate-report-btn">+ Generate Report</button>
+        </div>
+      </header>
+
+      <section class="filter-panel">
+        <div class="filter-panel-group">
+          <label for="type-filter" class="sr-only">Report type</label>
+          <select id="type-filter" class="filter-select">
+            <option value="All">All Report Types</option>
+            <option value="Blood Panel">Blood Panel</option>
+            <option value="ECG">ECG</option>
+            <option value="Radiology">Radiology</option>
+            <option value="Allergy Panel">Allergy Panel</option>
+            <option value="Diabetes Summary">Diabetes Summary</option>
+            <option value="Lipid Profile">Lipid Profile</option>
+            <option value="Medication Review">Medication Review</option>
+            <option value="Discharge Summary">Discharge Summary</option>
+          </select>
+        </div>
+
+        <div class="filter-panel-group">
+          <label for="date-start" class="sr-only">Start date</label>
+          <input id="date-start" type="date" />
+        </div>
+
+        <div class="filter-panel-group">
+          <label for="date-end" class="sr-only">End date</label>
+          <input id="date-end" type="date" />
+        </div>
+
+        <div class="filter-panel-group">
+          <button type="button" id="export-csv" class="btn btn-outline small">Export CSV</button>
+          <button type="button" id="export-pdf" class="btn btn-outline small">Export PDF</button>
+          <button type="button" id="print-report" class="btn btn-outline small">Print</button>
+        </div>
+      </section>
+
+      <section class="stats-grid" id="overview" aria-label="Key metrics">
+        <article class="stat-card stat-card--blue">
+          <span class="label">Total Reports</span>
+          <p class="value" id="stat-total">0</p>
+        </article>
+
+        <article class="stat-card stat-card--green">
+          <span class="label">Patients Reviewed</span>
+          <p class="value" id="stat-reviewed">0</p>
+        </article>
+
+        <article class="stat-card stat-card--orange">
+          <span class="label">High Risk Patients</span>
+          <p class="value" id="stat-risk">0</p>
+        </article>
+
+        <article class="stat-card stat-card--red">
+          <span class="label">Generated Today</span>
+          <p class="value" id="stat-generated">0</p>
+        </article>
+      </section>
+
+      <section id="actions" class="quick-actions" aria-label="Quick actions">
+        <article class="quick-card">
+          <h3>Generate Health Report</h3>
+          <p>Create a new comprehensive patient health report using AI summaries.</p>
+        </article>
+
+        <article class="quick-card">
+          <h3>Export PDF</h3>
+          <p>Download selected reports as printable PDFs.</p>
+        </article>
+
+        <article class="quick-card">
+          <h3>Export Excel</h3>
+          <p>Export report metadata for further analysis in spreadsheets.</p>
+        </article>
+      </section>
+
+      <section class="cards-grid">
+        <div>
+          <article class="appointments-card">
+            <div class="section-header">
+              <h3>Reports Table</h3>
+              <button type="button" id="download-all" class="btn btn-outline small">Download All</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="appointments-table" aria-label="Reports table">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Patient Name</th>
+                    <th>Report Type</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="reports-tbody"></tbody>
+              </table>
+              <div id="no-results" class="table-empty hidden">No reports found</div>
+              <div class="pagination-bar">
+                <button type="button" id="prev-page" class="btn btn-outline small">Previous</button>
+                <span id="page-indicator">Page 1</span>
+                <button type="button" id="next-page" class="btn btn-outline small">Next</button>
+              </div>
+              <div class="loading-overlay hidden" id="report-loading">
+                <div class="loading-spinner"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <aside>
+          <article class="patient-list report-card">
+            <div class="section-header">
+              <h3>Recent Activity</h3>
+              <a href="#">See all</a>
+            </div>
+
+            <div class="patient-card">
+              <div class="patient-avatar">AI</div>
+              <div class="patient-info">
+                <strong>AI Summary</strong>
+                <p>Generated blood panel summary for Emma Walker</p>
+              </div>
+              <div class="patient-status" aria-label="Reminder Sent">Generated</div>
+            </div>
+
+            <div class="patient-card">
+              <div class="patient-avatar">NK</div>
+              <div class="patient-info">
+                <strong>Kavita Rao</strong>
+                <p>Downloaded ECG report for Noah Patel</p>
+              </div>
+              <div class="patient-status" aria-label="Confirmed">Completed</div>
+            </div>
+
+            <div class="patient-card">
+              <div class="patient-avatar">NS</div>
+              <div class="patient-info">
+                <strong>Neha Sharma</strong>
+                <p>Requested diabetes summary for Ava Johnson</p>
+              </div>
+              <div class="patient-status" aria-label="Pending">Pending</div>
+            </div>
+          </article>
+
+          <article class="report-card" style="margin-top:14px">
+            <div class="section-header">
+              <h3>Analytics Summary</h3>
+              <a href="#">Details</a>
+            </div>
+
+            <div class="report-row">
+              <div>
+                <div class="kicker">Total Patients</div>
+                <div class="lead">12,430</div>
+              </div>
+              <div>
+                <div class="kicker">Today's Visits</div>
+                <div class="lead">278</div>
+              </div>
+            </div>
+
+            <div class="report-row">
+              <div style="width:100%">
+                <div class="kicker">AI Reports Generated</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+                  <div style="flex:1">
+                    <div class="progress"><i style="width:62%"></i></div>
+                  </div>
+                  <div style="min-width:44px;text-align:right;font-weight:700">742</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-row" style="margin-top:10px">
+              <div style="width:100%">
+                <div class="kicker">Pending Reports</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+                  <div style="flex:1">
+                    <div class="progress"><i style="width:9%;background:linear-gradient(90deg,var(--accent-orange),#fb923c)"></i></div>
+                  </div>
+                  <div style="min-width:44px;text-align:right;font-weight:700">118</div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer-note">
+    <p>© 2026 RK Health. All rights reserved.</p>
+    <p>Unified dashboard for patient care, reminders, and analytics.</p>
+  </footer>
+
+  <div id="report-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+    <div class="modal-card" role="document">
+      <div class="modal-header">
+        <div>
+          <p class="kicker">Report details</p>
+          <h3 id="report-modal-title">Report Summary</h3>
+        </div>
+        <button type="button" class="btn btn-outline" id="close-report-modal">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-group">
+            <label>Report ID</label>
+            <p id="detail-report-id"></p>
+          </div>
+          <div class="modal-group">
+            <label>Patient Name</label>
+            <p id="detail-patient-name"></p>
+          </div>
+          <div class="modal-group">
+            <label>Report Type</label>
+            <p id="detail-report-type"></p>
+          </div>
+          <div class="modal-group">
+            <label>Doctor</label>
+            <p id="detail-doctor"></p>
+          </div>
+          <div class="modal-group">
+            <label>Date</label>
+            <p id="detail-date"></p>
+          </div>
+          <div class="modal-group">
+            <label>Status</label>
+            <p id="detail-status"></p>
+          </div>
+          <div class="modal-group modal-full">
+            <label>Summary</label>
+            <p id="detail-summary" class="modal-text"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="report-toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script src="js/report.js"></script>
+</body>
+</html>

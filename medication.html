@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RK Health – Medication Management</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+
+<body>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo">RK</div>
+                <div>
+                    <h1>RK Health</h1>
+                    <p>AI Patient Appointment & Medication Reminder System</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link">Overview</a></li>
+                    <li><a href="appointment.html" class="nav-link">Appointments</a></li>
+                    <li><a href="medication.html" class="nav-link active">Medications</a></li>
+                    <li><a href="report.html" class="nav-link">Reports</a></li>
+                    <li><a href="summary.html" class="nav-link">AI Summary</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <header class="topbar">
+                <div class="topbar-left">
+                    <p>Medication Management</p>
+                    <h2>Manage prescriptions, reminders, and patient adherence in one place.</h2>
+                </div>
+                <div class="topbar-actions">
+                    <form class="search-box" role="search">
+                        <label for="search-medications" class="sr-only">Search medications</label>
+                        <input id="search-medications" type="search" placeholder="Search patient, medicine, doctor" />
+                    </form>
+                    <button id="add-medication-btn" class="action-button">+ Add Medication</button>
+                </div>
+            </header>
+
+            <section class="filter-panel">
+                <div class="filter-panel-group">
+                    <label for="filter-status" class="sr-only">Filter by reminder status</label>
+                    <select id="filter-status" class="filter-select">
+                        <option value="All">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Missed">Missed</option>
+                    </select>
+                </div>
+                <button type="button" id="reset-filters-btn" class="btn btn-outline">Reset Filters</button>
+            </section>
+
+            <section class="stats-grid" aria-label="Medication overview">
+                <article class="stat-card stat-card--blue">
+                    <span class="label">Today's Medicines</span>
+                    <p class="value" id="stat-today">0</p>
+                </article>
+                <article class="stat-card stat-card--green">
+                    <span class="label">Active Prescriptions</span>
+                    <p class="value" id="stat-active">0</p>
+                </article>
+                <article class="stat-card stat-card--orange">
+                    <span class="label">Pending Reminders</span>
+                    <p class="value" id="stat-pending">0</p>
+                </article>
+                <article class="stat-card stat-card--red">
+                    <span class="label">Completed Today</span>
+                    <p class="value" id="stat-completed">0</p>
+                </article>
+            </section>
+
+            <section class="section-header" aria-label="Medication tracker header">
+                <div>
+                    <h3>Medication Tracker</h3>
+                    <p class="table-summary" id="records-summary">Total records: 0</p>
+                </div>
+                <a href="#">Review history</a>
+            </section>
+
+            <div class="table-responsive">
+                <table class="appointments-table medication-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Medicine</th>
+                            <th>Dosage</th>
+                            <th>Frequency</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Reminder Time</th>
+                            <th>Doctor</th>
+                            <th>Reminder Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="no-results" class="table-empty hidden">No medications found</div>
+                <div class="pagination-bar">
+                    <button type="button" id="prev-page" class="btn btn-outline small">Previous</button>
+                    <span id="page-indicator">Page 1</span>
+                    <button type="button" id="next-page" class="btn btn-outline small">Next</button>
+                </div>
+                <div class="loading-overlay hidden" id="loading-overlay">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="medication-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <div class="modal-card" role="document">
+                    <div class="modal-header">
+                        <div>
+                            <p class="kicker">Medication details</p>
+                            <h3 id="modal-title">Add Medication</h3>
+                        </div>
+                        <button type="button" class="btn btn-outline" id="cancel-medication-btn">Cancel</button>
+                    </div>
+                    <form id="medication-form">
+                        <div class="modal-grid">
+                            <div class="modal-group">
+                                <label for="patient-name">Patient Name</label>
+                                <input id="patient-name" name="patientName" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="medicine-name">Medicine Name</label>
+                                <input id="medicine-name" name="medicineName" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="dosage">Dosage</label>
+                                <input id="dosage" name="dosage" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="frequency">Frequency</label>
+                                <input id="frequency" name="frequency" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="start-date">Start Date</label>
+                                <input id="start-date" name="startDate" type="date" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="end-date">End Date</label>
+                                <input id="end-date" name="endDate" type="date" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="reminder-time">Reminder Time</label>
+                                <input id="reminder-time" name="reminderTime" type="time" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="prescribing-doctor">Prescribing Doctor</label>
+                                <input id="prescribing-doctor" name="doctor" type="text" required />
+                            </div>
+                            <div class="modal-group">
+                                <label for="reminder-status">Reminder Status</label>
+                                <select id="reminder-status" name="status" required>
+                                    <option value="">Select status</option>
+                                    <option>Active</option>
+                                    <option>Completed</option>
+                                    <option>Missed</option>
+                                </select>
+                            </div>
+                            <div class="modal-group modal-full">
+                                <label for="medication-notes">Notes</label>
+                                <textarea id="medication-notes" name="notes" placeholder="Optional notes"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" id="cancel-medication-btn-bottom">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="save-medication-btn">Save Medication</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer-note">
+        <p>© 2026 RK Health. All rights reserved.</p>
+        <p>Trusted appointment and medication management for smarter patient care.</p>
+    </footer>
+
+    <div id="med-toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <script src="js/medication.js"></script>
+</body>
+
+</html>
