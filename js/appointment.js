@@ -345,7 +345,56 @@
         }
 
         if (editingAppointmentId !== null) {
+           if (editingAppointmentId !== null) {
 
+    console.log("Updating ID:", editingAppointmentId);
+
+    console.log("Updating Data:", {
+        id: editingAppointmentId,
+        patientName: values.name,
+        age: values.age,
+        gender: values.gender,
+        doctor: values.doctor,
+        department: values.department,
+        date: values.date,
+        time: values.time,
+        phone: values.phone,
+        status: values.status,
+        notes: values.notes
+    });
+
+    fetch(CONFIG.SCRIPT_URL, {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            action: "updateAppointment",
+
+            data: {
+
+                id: editingAppointmentId,
+
+                patientName: values.name,
+                age: values.age,
+                gender: values.gender,
+                doctor: values.doctor,
+                department: values.department,
+                date: values.date,
+                time: values.time,
+                phone: values.phone,
+                status: values.status,
+                notes: values.notes
+
+            }
+
+        })
+
+    }) 
     fetch(CONFIG.SCRIPT_URL, {
 
         method: "POST",
@@ -383,7 +432,9 @@
 
     .then(result => {
 
-        if (result.success) {
+    console.log("Backend Response:", result);
+
+    if (result.success) {
 
             loadAppointments();
 
