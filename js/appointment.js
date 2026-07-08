@@ -1,4 +1,5 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
+    console.log("RK Health Appointment JS Version 2");
     const openButton = document.getElementById("schedule-appointment-btn");
     const modal = document.getElementById("appointment-modal");
     const cancelButtons = document.querySelectorAll("#cancel-appointment-btn, #cancel-appointment-btn-bottom");
@@ -495,15 +496,16 @@ console.log("Sending Data:", {
 
     tableBody.addEventListener("click", function (event) {
         const editButton = event.target.closest(".edit-appointment-btn");
+        console.log("Edit button:", editButton);
         if (editButton) {
-            const appointmentId = Number(editButton.dataset.id);
+            const appointmentId = editButton.dataset.id;
             loadForEdit(appointmentId);
             return;
         }
 
         const deleteButton = event.target.closest(".delete-appointment-btn");
         if (deleteButton) {
-            const appointmentId = Number(deleteButton.dataset.id);
+            const appointmentId = deleteButton.dataset.id;
             deleteAppointment(appointmentId);
             return;
         }
