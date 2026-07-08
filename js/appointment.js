@@ -344,14 +344,59 @@
         }
 
         if (editingAppointmentId !== null) {
-            updateAppointment(values);
-            closeModal();
-            showToast("Appointment Updated Successfully");
-        } else {
-            addAppointment(values);
-            closeModal();
-            showToast("Appointment Added Successfully");
+    updateAppointment(values);
+    closeModal();
+    showToast("Appointment Updated Successfully");
+} else {
+
+    fetch(CONFIG.SCRIPT_URL, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        action: "addAppointment",
+        data: {
+            patientName: values.name,
+            age: values.age,
+            gender: values.gender,
+            doctor: values.doctor,
+            department: values.department,
+            date: values.date,
+            time: values.time,
+            phone: values.phone,
+            status: values.status,
+            notes: values.notes
         }
+    })
+})
+.then(res => res.json())
+.then(result => {
+
+    if(result.success){
+
+        addAppointment(values);
+
+        closeModal();
+
+        showToast("Appointment Saved Successfully ✅");
+
+    }else{
+
+        showToast(result.message);
+
+    }
+
+})
+.catch(error => {
+
+    console.error(error);
+
+    showToast("Backend Connection Failed");
+
+});    
+
+}
     }
 
     openButton.addEventListener("click", function () {
