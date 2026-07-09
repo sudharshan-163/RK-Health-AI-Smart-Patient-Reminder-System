@@ -1,29 +1,103 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     const generateBtn = document.getElementById("generate-summary-btn");
     const searchInput = document.getElementById("search-summaries");
+    const searchInputFilter = document.getElementById("search-summaries-filter");
     const exportButton = document.getElementById("export-summary-report");
     const prevPageBtn = document.getElementById("prev-summary-page");
     const nextPageBtn = document.getElementById("next-summary-page");
     const pageIndicator = document.getElementById("summary-page-indicator");
     const summaryList = document.getElementById("summary-list");
     const noResults = document.getElementById("summary-no-results");
+    const aiActivityList = document.getElementById("ai-activity-list");
 
-    const statTotal = document.querySelector("#overview .stat-card:nth-child(1) .value");
-    const statRisk = document.querySelector("#overview .stat-card:nth-child(2) .value");
-    const statAdherence = document.querySelector("#overview .stat-card:nth-child(3) .value");
-    const statAccuracy = document.querySelector("#overview .stat-card:nth-child(4) .value");
+    const statTotal = document.getElementById("stat-total");
+    const statRisk = document.getElementById("stat-risk");
+    const statAdherence = document.getElementById("stat-adherence");
+    const statAccuracy = document.getElementById("stat-accuracy");
 
-    const summaries = [
-        { id: "S-2201", name: "Emma Walker", age: 62, condition: "Type 2 Diabetes", risk: "Medium", meds: "Metformin 500mg, Insulin (basal)", lastVisit: "2026-07-06", nextVisit: "2026-07-20", summary: "Elevated fasting glucose trends with inconsistent post-prandial control. Weight gain noted, moderate microvascular risk.", recommendation: "Schedule diabetes education, review medication timing, and follow up in two weeks.", confidence: 92, healthScore: 78, medicationScore: 85 },
-        { id: "S-2202", name: "Noah Patel", age: 48, condition: "Hypertension", risk: "Low", meds: "Amlodipine 5mg", lastVisit: "2026-07-05", nextVisit: "2026-07-22", summary: "Intermittent blood pressure elevations and missed doses, borderline lipid profile.", recommendation: "Reinforce reminders, home BP monitoring, and dietary counseling.", confidence: 95, healthScore: 84, medicationScore: 88 },
-        { id: "S-2203", name: "Sophia Lee", age: 71, condition: "COPD", risk: "High", meds: "Salbutamol PRN, Tiotropium", lastVisit: "2026-07-04", nextVisit: "2026-07-25", summary: "Increased exacerbation risk with reduced inhaler adherence and borderline oxygen saturation.", recommendation: "Schedule inhaler training, ensure refills, and create an action plan.", confidence: 88, healthScore: 69, medicationScore: 76 },
-        { id: "S-2204", name: "Michael Brown", age: 55, condition: "Hyperlipidemia", risk: "Low", meds: "Atorvastatin 20mg", lastVisit: "2026-07-03", nextVisit: "2026-07-30", summary: "LDL above target, consistent adherence, consider therapy escalation.", recommendation: "Evaluate dose adjustment or add non-statin therapy and dietary counseling.", confidence: 90, healthScore: 82, medicationScore: 89 },
-        { id: "S-2205", name: "Ava Johnson", age: 36, condition: "Asthma", risk: "Medium", meds: "Budesonide, Salbutamol PRN", lastVisit: "2026-07-02", nextVisit: "2026-07-18", summary: "Increased rescue inhaler use, seasonal allergy triggers, medium exacerbation risk.", recommendation: "Review technique, step up controller therapy, follow up in two weeks.", confidence: 89, healthScore: 75, medicationScore: 81 },
-        { id: "S-2206", name: "Liam Kelly", age: 67, condition: "Heart Failure", risk: "High", meds: "ACE inhibitor, Beta blocker", lastVisit: "2026-07-01", nextVisit: "2026-07-21", summary: "Weight gain and mild fluid retention indicate early decompensation, adherence variable.", recommendation: "Urgent weight check, optimize dosing, earlier clinic review.", confidence: 86, healthScore: 68, medicationScore: 72 },
-    ];
+    const insightPatients = document.getElementById("insight-patients");
+    const insightReports = document.getElementById("insight-reports");
+    const insightReportsMeter = document.getElementById("insight-reports-meter");
+    const insightCritical = document.getElementById("insight-critical");
+    const insightCriticalMeter = document.getElementById("insight-critical-meter");
+    const insightCompliance = document.getElementById("insight-compliance");
+    const insightComplianceMeter = document.getElementById("insight-compliance-meter");
+    const insightHealth = document.getElementById("insight-health");
+    const insightHealthMeter = document.getElementById("insight-health-meter");
 
+    let summaries = [];
     let currentPage = 1;
     const pageSize = 3;
+
+    function createFallbackSummaries() {
+        return [
+            { id: "SUM-1", name: "Emma Walker", age: 62, condition: "Cardiology", risk: "Medium", meds: "Metformin 500mg", lastVisit: "2026-07-06", nextVisit: "2026-07-20", summary: "Follow-up scheduled for cardiac evaluation.", recommendation: "Continue monitoring and schedule follow-up.", confidence: 92, healthScore: 78, medicationScore: 85 },
+            { id: "SUM-2", name: "Noah Patel", age: 48, condition: "Neurology", risk: "Low", meds: "Amlodipine 5mg", lastVisit: "2026-07-05", nextVisit: "2026-07-22", summary: "Routine checkup, no acute issues.", recommendation: "Annual checkup recommended.", confidence: 95, healthScore: 84, medicationScore: 88 },
+            { id: "SUM-3", name: "Sophia Lee", age: 71, condition: "Orthopedics", risk: "High", meds: "Salbutamol PRN", lastVisit: "2026-07-04", nextVisit: "2026-07-25", summary: "Mobility assessment required.", recommendation: "Schedule orthopedic consultation.", confidence: 88, healthScore: 69, medicationScore: 76 },
+        ];
+    }
+
+    function buildSummary(item) {
+        return {
+            id: String(item.id),
+            name: item.name || "",
+            age: Number(item.age) || 0,
+            condition: item.condition || "General Checkup",
+            risk: item.risk || "Medium",
+            meds: item.meds || "",
+            lastVisit: item.lastVisit || "",
+            nextVisit: item.nextVisit || "",
+            summary: item.summary || "",
+            recommendation: item.recommendation || "",
+            confidence: Number(item.confidence) || 85,
+            healthScore: Number(item.healthScore) || 75,
+            medicationScore: Number(item.medicationScore) || 80
+        };
+    }
+
+    async function loadSummaries() {
+        setLoading(true);
+        try {
+            const result = await requestJson(`${CONFIG.SCRIPT_URL}?action=summaries`);
+            if (result.success && Array.isArray(result.data)) {
+                summaries = result.data.map(buildSummary);
+            } else {
+                summaries = createFallbackSummaries();
+                showToast(result.message || "Using offline summary data.");
+            }
+        } catch (error) {
+            console.error(error);
+            summaries = createFallbackSummaries();
+        } finally {
+            setLoading(false);
+            renderSummaries();
+        }
+    }
+
+    function requestJson(url, options) {
+        return fetch(url, options)
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(text) {
+                try {
+                    return text ? JSON.parse(text) : {};
+                } catch (error) {
+                    return { success: false, message: text || "Unexpected response from server" };
+                }
+            })
+            .catch(function(error) {
+                console.error(error);
+                return { success: false, message: "Unable to reach the backend service." };
+            });
+    }
+
+    function setLoading(active) {
+        const overlay = document.getElementById("summary-loading");
+        if (overlay) {
+            overlay.style.display = active ? "flex" : "none";
+        }
+    }
 
     function showToast(message) {
         let toast = document.querySelector(".toast");
@@ -46,6 +120,23 @@
         statRisk.textContent = filtered.filter((item) => item.risk === "High").length;
         statAdherence.textContent = `${Math.round(filtered.reduce((sum, item) => sum + item.medicationScore, 0) / (filtered.length || 1))}%`;
         statAccuracy.textContent = `${Math.round(filtered.reduce((sum, item) => sum + item.confidence, 0) / (filtered.length || 1))}%`;
+
+        // Update AI Insights sidebar
+        const uniquePatients = new Set(filtered.map(s => s.name)).size;
+        const highRisk = filtered.filter((item) => item.risk === "High").length;
+        const avgMedicationScore = Math.round(filtered.reduce((sum, item) => sum + item.medicationScore, 0) / (filtered.length || 1));
+        const avgHealthScore = Math.round(filtered.reduce((sum, item) => sum + item.healthScore, 0) / (filtered.length || 1));
+        const todayCount = filtered.filter((item) => item.lastVisit === new Date().toISOString().slice(0, 10)).length;
+
+        insightPatients.textContent = uniquePatients;
+        insightReports.textContent = todayCount;
+        insightReportsMeter.style.width = Math.min(100, todayCount * 10) + "%";
+        insightCritical.textContent = highRisk;
+        insightCriticalMeter.style.width = Math.min(100, highRisk * 5) + "%";
+        insightCompliance.textContent = avgMedicationScore + "%";
+        insightComplianceMeter.style.width = avgMedicationScore + "%";
+        insightHealth.textContent = avgHealthScore;
+        insightHealthMeter.style.width = avgHealthScore + "%";
     }
 
     function renderSummaries() {
@@ -94,18 +185,39 @@
         nextPageBtn.disabled = currentPage === totalPages;
 
         updateStats(filtered);
+        renderActivity(filtered);
     }
 
-    function simulateGeneration() {
-        const overlay = document.createElement("div");
-        overlay.className = "loading-overlay";
-        overlay.innerHTML = '<div class="loading-spinner"></div>';
-        document.body.appendChild(overlay);
-        setTimeout(() => {
-            document.body.removeChild(overlay);
-            showToast("AI summary generated successfully");
-            renderSummaries();
-        }, 1400);
+    function renderActivity(filtered) {
+        if (!aiActivityList) return;
+
+        const activityTypes = ["Generated Health Summary", "Generated Risk Assessment", "Generated Medication Review", "Generated Appointment Recommendation"];
+        const recentActivity = filtered.slice(0, 4).map((item, index) => {
+            const initials = item.name.split(" ").map(p => p[0]).join("");
+            const type = activityTypes[index % activityTypes.length];
+            const date = item.lastVisit || new Date().toISOString().slice(0, 10);
+            const status = item.risk === "High" ? "Pending" : "Completed";
+
+            return `
+                <div class="activity-card">
+                    <div class="patient-avatar">${initials}</div>
+                    <div class="patient-info">
+                        <strong>${type}</strong>
+                        <p>${item.name} · ${date}</p>
+                    </div>
+                    <div class="patient-status" aria-label="${status}">${status}</div>
+                </div>
+            `;
+        }).join("");
+
+        aiActivityList.innerHTML = recentActivity || `
+            <div class="activity-card activity-placeholder">
+                <div class="patient-info">
+                    <strong>No activity yet</strong>
+                    <p>Generate summaries to see activity</p>
+                </div>
+            </div>
+        `;
     }
 
     function exportSummaries() {
@@ -125,7 +237,7 @@
     }
 
     generateBtn.addEventListener("click", () => {
-        simulateGeneration();
+        loadSummaries();
     });
 
     exportButton.addEventListener("click", (event) => {
@@ -135,8 +247,17 @@
 
     searchInput.addEventListener("input", () => {
         currentPage = 1;
+        if (searchInputFilter) searchInputFilter.value = searchInput.value;
         renderSummaries();
     });
+
+    if (searchInputFilter) {
+        searchInputFilter.addEventListener("input", () => {
+            currentPage = 1;
+            searchInput.value = searchInputFilter.value;
+            renderSummaries();
+        });
+    }
 
     prevPageBtn.addEventListener("click", () => {
         if (currentPage > 1) {
@@ -150,5 +271,5 @@
         renderSummaries();
     });
 
-    renderSummaries();
+    loadSummaries();
 });

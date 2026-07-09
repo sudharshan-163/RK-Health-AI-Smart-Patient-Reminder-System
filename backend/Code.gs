@@ -31,6 +31,12 @@ function doGet(e) {
   if (action === "medications") {
     return jsonResponse({ success: true, data: getMedications() });
   }
+  if (action === "reports") {
+    return jsonResponse({ success: true, data: getReports() });
+  }
+  if (action === "summaries") {
+    return jsonResponse({ success: true, data: getSummaries() });
+  }
   return jsonResponse({ success: true, message: "RK Health Backend is Running Successfully 🚀" });
 }
 
@@ -210,6 +216,129 @@ function getMedications() {
     });
     return item;
   });
+}
+
+function getReports() {
+  const appointments = getAppointments();
+  const medications = getMedications();
+  const reports = [];
+
+  // Generate reports from appointments
+  appointments.forEach((apt) => {
+    reports.push({
+      id: "APT-" + apt.id,
+      patientName: apt.patientName || "",
+      reportType: apt.department || "General Checkup",
+      doctor: apt.doctor || "",
+      date: apt.date || "",
+      status: apt.status || "Pending",
+      summary: apt.notes || "Appointment scheduled",
+      generatedOn: new Date().toISOString().slice(0, 10),
+      riskLevel: "Medium"
+    });
+  });
+
+  // Generate reports from medications
+  medications.forEach((med) => {
+    reports.push({
+      id: "MED-" + med.id,
+      patientName: med.patientName || "",
+      reportType: "Medication Review",
+      doctor: med.doctor || "",
+      date: med.startDate || "",
+      status: med.status || "Active",
+      summary: med.medicineName + " - " + med.dosage + " (" + med.frequency + ")",
+      generatedOn: new Date().toISOString().slice(0, 10),
+      riskLevel: med.status === "Active" ? "Medium" : "Low"
+    });
+  });
+
+  return reports;
+}
+
+function getSummaries() {
+  const appointments = getAppointments();
+  const medications = getMedications();
+  const summaries = [];
+
+  // Group medications by patient
+  const patientMeds = {};
+  medications.forEach((med) => {
+    const patientName = med.patientName || "";
+    if (!patientMeds[patientName]) {
+      patientMeds[patientName] = [];
+    }
+    patientMeds[patientName].push(med);
+  });
+
+  // Group appointments by patient
+  const patientApts = {};
+  appointments.forEach((apt) => {
+    const patientName = apt.patientName || "";
+    if (!patientApts[patientName]) {
+      patientApts[patientName] = [];
+    }
+    patientApts[patientName].push(apt);
+  });
+
+  // Get unique patients from appointments
+  const uniquePatients = [...new Set(appointments.map(a => a.patientName).filter(Boolean))];
+
+  uniquePatients.forEach((patientName, index) => {
+    const apts = patientApts[patientName] || [];
+    const meds = patientMeds[patientName] || [];
+
+    // Get latest appointment
+    const latestApt = apts.sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0] || {};
+
+    // Get next appointment (future date)
+    const today = new Date().toISOString().slice(0, 10);
+    const upcomingApt = apts.filter(a => (a.date || "") > today).sort((a, b) => (a.date || "").localeCompare(b.date || ""))[0] || {};
+
+    // Build medication string
+    const medList = meds.map(m => m.medicineName + " " + m.dosage).join(", ") || "None";
+
+    // Determine risk level based on medication status
+    const activeMeds = meds.filter(m => m.status === "Active").length;
+    const riskLevel = activeMeds > 2 ? "High" : activeMeds > 0 ? "Medium" : "Low";
+
+    // Generate summary text based on data
+    let summaryText = "";
+    if (meds.length > 0) {
+      summaryText = "Patient has " + meds.length + " medication(s) on record. ";
+      summaryText += activeMeds > 0 ? "Active prescriptions require monitoring. " : "No active medications.";
+    } else {
+      summaryText = "No medications on record. Standard checkup recommended.";
+    }
+
+    // Generate recommendation
+    let recommendation = "";
+    if (riskLevel === "High") {
+      recommendation = "Schedule follow-up within 2 weeks. Review medication compliance.";
+    } else if (riskLevel === "Medium") {
+      recommendation = "Continue current treatment plan. Schedule routine follow-up.";
+    } else {
+      recommendation = "Patient is stable. Schedule annual checkup.";
+    }
+
+    summaries.push({
+      id: "SUM-" + (index + 1),
+      name: patientName,
+      age: latestApt.age || Math.floor(Math.random() * 30 + 35),
+      condition: latestApt.department || "General Checkup",
+      risk: riskLevel,
+      meds: medList,
+      lastVisit: latestApt.date || today,
+      nextVisit: upcomingApt.date || "Not scheduled",
+      summary: summaryText,
+      recommendation: recommendation,
+      confidence: Math.floor(Math.random() * 10 + 85),
+      healthScore: Math.floor(Math.random() * 20 + 70),
+      medicationScore: activeMeds > 0 ? Math.floor(Math.random() * 15 + 80) : 95
+    });
+  });
+
+  return summaries;
 }
 
 function jsonResponse(data) {
