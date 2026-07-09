@@ -136,10 +136,22 @@ function getAppointments() {
     return [];
   }
   const headers = values[0];
+  const dateIndex = headers.indexOf("date");
+  const timeIndex = headers.indexOf("time");
   return values.slice(1).map((row) => {
     const item = {};
     headers.forEach((header, index) => {
-      item[header] = row[index];
+      if (header === "date" && row[index]) {
+        item[header] = String(row[index]).slice(0, 10);
+      } else if (header === "time" && row[index]) {
+        item[header] = Utilities.formatDate(
+          new Date(row[index]),
+          Session.getScriptTimeZone(),
+          "hh:mm a"
+        );
+      } else {
+        item[header] = row[index];
+      }
     });
     return item;
   });

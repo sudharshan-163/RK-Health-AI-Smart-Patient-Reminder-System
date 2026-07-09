@@ -76,27 +76,6 @@
         });
     }
 
-    function formatTime(value) {
-        if (!value) {
-            return "";
-        }
-        // Handle Date objects from Google Sheets (which have base date 1899-12-30)
-        if (value instanceof Date && !isNaN(value.getTime())) {
-            // Extract just the time portion and format it
-            const hours = value.getUTCHours();
-            const minutes = value.getUTCMinutes();
-            const period = hours >= 12 ? "PM" : "AM";
-            const displayHours = hours % 12 || 12;
-            const displayMinutes = String(minutes).padStart(2, "0");
-            return `${displayHours}:${displayMinutes} ${period}`;
-        }
-        // If it's already a string (HH:mm format), use as-is
-        if (typeof value === "string") {
-            return value;
-        }
-        return String(value);
-    }
-
     function buildAppointment(item) {
         return {
             id: Number(item.id),
@@ -107,7 +86,7 @@
             department: item.department || "",
             dateRaw: normalizeDate(item.date),
             dateDisplay: formatDate(item.date),
-            time: formatTime(item.time),
+            time: item.time || "",
             phone: item.phone || "",
             status: item.status || "Pending",
             notes: item.notes || "",
