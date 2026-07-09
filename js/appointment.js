@@ -251,7 +251,7 @@
 
     function getFormValues() {
         return {
-            name: (form.elements.patientName?.value || "").trim(),
+            patientName: (form.elements.patientName?.value || "").trim(),
             age: (form.elements.age?.value || "").trim(),
             gender: (form.elements.gender?.value || "").trim(),
             doctor: (form.elements.doctor?.value || "").trim(),
