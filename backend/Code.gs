@@ -42,22 +42,24 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    const request = typeof e.postData.contents === "string" ? JSON.parse(e.postData.contents) : {};
-    const action = request.action;
+    const action = e.parameter.action;
+    const data = e.parameter.data
+      ? JSON.parse(e.parameter.data)
+      : {};
 
     switch (action) {
       case "addAppointment":
-        return jsonResponse(addAppointment(request.data));
+        return jsonResponse(addAppointment(data));
       case "updateAppointment":
-        return jsonResponse(updateAppointment(request.data));
+        return jsonResponse(updateAppointment(data));
       case "deleteAppointment":
-        return jsonResponse(deleteAppointment(request.data));
+        return jsonResponse(deleteAppointment(data));
       case "addMedication":
-        return jsonResponse(addMedication(request.data));
+        return jsonResponse(addMedication(data));
       case "updateMedication":
-        return jsonResponse(updateMedication(request.data));
+        return jsonResponse(updateMedication(data));
       case "deleteMedication":
-        return jsonResponse(deleteMedication(request.data));
+        return jsonResponse(deleteMedication(data));
       default:
         return jsonResponse({ success: false, message: "Invalid Action" });
     }

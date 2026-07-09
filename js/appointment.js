@@ -320,16 +320,17 @@
     async function saveAppointment(values) {
         setLoading(true);
         const action = editingAppointmentId !== null ? "updateAppointment" : "addAppointment";
-        const payload = {
-            action,
-            data: editingAppointmentId !== null
-                ? { id: editingAppointmentId, ...values }
-                : values,
-        };
+        const data = editingAppointmentId !== null
+            ? { id: editingAppointmentId, ...values }
+            : values;
+
+        const body = new URLSearchParams();
+        body.append("action", action);
+        body.append("data", JSON.stringify(data));
+
         const result = await requestJson(CONFIG.SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: body
         });
         setLoading(false);
         if (result.success) {
@@ -350,10 +351,14 @@
             return;
         }
         setLoading(true);
+
+        const body = new URLSearchParams();
+        body.append("action", "deleteAppointment");
+        body.append("data", JSON.stringify({ id: appointmentId }));
+
         const result = await requestJson(CONFIG.SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "deleteAppointment", data: { id: appointmentId } }),
+            body: body
         });
         setLoading(false);
         if (result.success) {

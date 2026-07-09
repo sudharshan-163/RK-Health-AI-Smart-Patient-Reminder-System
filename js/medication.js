@@ -233,14 +233,15 @@
     async function saveMedication(values) {
         setLoading(true);
         const action = editingId !== null ? "updateMedication" : "addMedication";
-        const payload = {
-            action,
-            data: editingId !== null ? { id: editingId, ...values } : values,
-        };
+        const data = editingId !== null ? { id: editingId, ...values } : values;
+
+        const body = new URLSearchParams();
+        body.append("action", action);
+        body.append("data", JSON.stringify(data));
+
         const result = await requestJson(CONFIG.SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: body
         });
         setLoading(false);
         if (result.success) {
@@ -262,10 +263,14 @@
             return;
         }
         setLoading(true);
+
+        const body = new URLSearchParams();
+        body.append("action", "deleteMedication");
+        body.append("data", JSON.stringify({ id: id }));
+
         const result = await requestJson(CONFIG.SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "deleteMedication", data: { id } }),
+            body: body
         });
         setLoading(false);
         if (result.success) {
