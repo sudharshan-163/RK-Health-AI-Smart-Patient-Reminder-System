@@ -144,11 +144,16 @@ function getAppointments() {
       if (header === "date" && row[index]) {
         item[header] = String(row[index]).slice(0, 10);
       } else if (header === "time" && row[index]) {
-        item[header] = Utilities.formatDate(
-          new Date(row[index]),
-          Session.getScriptTimeZone(),
-          "hh:mm a"
-        );
+        // Handle both string times and Date objects
+        const timeValue = row[index];
+        if (typeof timeValue === 'string') {
+          item[header] = timeValue;
+        } else {
+          const parsedDate = new Date(timeValue);
+          item[header] = !isNaN(parsedDate.getTime())
+            ? Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), "hh:mm a")
+            : String(timeValue);
+        }
       } else {
         item[header] = row[index];
       }

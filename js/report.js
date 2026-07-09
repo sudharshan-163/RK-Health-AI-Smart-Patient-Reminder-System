@@ -147,6 +147,7 @@
 
         reportsTbody.innerHTML = pageItems.map((report) => `
             <tr>
+              <td>${report.id}</td>
               <td>${report.patientName}</td>
               <td>${report.reportType}</td>
               <td>${report.doctor}</td>
