@@ -186,7 +186,7 @@ function updateMedication(data) {
   if (rowIndex === -1) {
     return { success: false, message: "Medication not found" };
   }
-  sheet.getRange(rowIndex + 2, 1, 1, 11).setValues([[
+  sheet.getRange(rowIndex + 1, 1, 1, 11).setValues([[
     data.id,
     data.patientName || "",
     data.medicineName || "",

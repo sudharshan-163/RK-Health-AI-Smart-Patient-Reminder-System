@@ -181,16 +181,16 @@
 
     function getFormValues() {
         return {
-            patientName: form.elements.patientName.value.trim(),
-            medicineName: form.elements.medicineName.value.trim(),
-            dosage: form.elements.dosage.value.trim(),
-            frequency: form.elements.frequency.value.trim(),
-            startDate: form.elements.startDate.value,
-            endDate: form.elements.endDate.value,
-            reminderTime: form.elements.reminderTime.value,
-            doctor: form.elements.doctor.value.trim(),
-            status: form.elements.status.value,
-            notes: form.elements.notes.value.trim(),
+            patientName: (form.elements.patientName?.value || "").trim(),
+            medicineName: (form.elements.medicineName?.value || "").trim(),
+            dosage: (form.elements.dosage?.value || "").trim(),
+            frequency: (form.elements.frequency?.value || "").trim(),
+            startDate: form.elements.startDate?.value || "",
+            endDate: form.elements.endDate?.value || "",
+            reminderTime: form.elements.reminderTime?.value || "",
+            doctor: (form.elements.doctor?.value || "").trim(),
+            status: form.elements.status?.value || "Active",
+            notes: (form.elements.notes?.value || "").trim(),
         };
     }
 
