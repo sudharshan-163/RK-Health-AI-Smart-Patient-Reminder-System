@@ -1,4 +1,4 @@
-const SPREADSHEET_ID = "1uluzZ4Oc3MeGnMgLIzSGIpeMVWAWzkUoO-atj14Ia7s";
+﻿const SPREADSHEET_ID = "1uluzZ4Oc3MeGnMgLIzSGIpeMVWAWzkUoO-atj14Ia7s";
 const APPOINTMENTS_SHEET = "Appointments";
 const MEDICATIONS_SHEET = "Medications";
 const REPORTS_SHEET = "Reports";
@@ -37,7 +37,7 @@ function doGet(e) {
   if (action === "summaries") {
     return jsonResponse({ success: true, data: getSummaries() });
   }
-  return jsonResponse({ success: true, message: "RK Health Backend is Running Successfully 🚀" });
+  return jsonResponse({ success: true, message: "RK Health Backend is Running Successfully ðŸš€" });
 }
 
 function doPost(e) {
@@ -142,7 +142,17 @@ function getAppointments() {
     const item = {};
     headers.forEach((header, index) => {
       if (header === "date" && row[index]) {
-        item[header] = String(row[index]).slice(0, 10);
+        const dateValue = row[index];
+
+        if (dateValue instanceof Date && !isNaN(dateValue.getTime())) {
+          item[header] = Utilities.formatDate(
+            dateValue,
+            Session.getScriptTimeZone(),
+            "yyyy-MM-dd"
+          );
+        } else {
+          item[header] = String(dateValue);
+        }
       } else if (header === "time" && row[index]) {
         // Handle both string times and Date objects
         const timeValue = row[index];
@@ -363,3 +373,4 @@ function getSummaries() {
 function jsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
+
