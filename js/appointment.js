@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const openButton = document.getElementById("schedule-appointment-btn");
     const modal = document.getElementById("appointment-modal");
     const cancelButtons = document.querySelectorAll("#cancel-appointment-btn, #cancel-appointment-btn-bottom");
@@ -319,6 +319,7 @@
 
     async function saveAppointment(values) {
         setLoading(true);
+
         const action = editingAppointmentId !== null ? "updateAppointment" : "addAppointment";
         const data = editingAppointmentId !== null
             ? { id: editingAppointmentId, ...values }
@@ -328,20 +329,30 @@
         body.append("action", action);
         body.append("data", JSON.stringify(data));
 
-        const result = await requestJson(CONFIG.SCRIPT_URL, {
-            method: "POST",
-            body: body
-        });
-        setLoading(false);
-        if (result.success) {
+        try {
+            await fetch(CONFIG.SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: body
+            });
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
             await loadAppointments();
+
+            setLoading(false);
             closeModal();
-            showToast(editingAppointmentId !== null ? "Appointment Updated Successfully" : "Appointment Saved Successfully");
-        } else {
-            showToast(result.message || "Unable to save appointment");
+
+            showToast(
+                editingAppointmentId !== null
+                    ? "Appointment Updated Successfully"
+                    : "Appointment Saved Successfully"
+            );
+        } catch (error) {
+            console.error(error);
+            setLoading(false);
+            showToast("Unable to save appointment");
         }
     }
-
     async function deleteAppointment(appointmentId) {
         const appointment = appointments.find((item) => Number(item.id) === Number(appointmentId));
         if (!appointment) {
@@ -493,3 +504,4 @@
     updateSortHeaders();
     loadAppointments();
 });
+
